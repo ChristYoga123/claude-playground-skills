@@ -2,7 +2,7 @@
 name: playground-session-guide
 description: Memandu satu sesi belajar nyata di dalam proyek playground yang sudah ada — membaca roadmap.yaml dan progress.json proyek, menentukan milestone berikutnya, menjelaskan konsepnya dengan berakar pada limitasi nyata di kode proyek saat ini (bukan contoh kode terpisah), mengimplementasikan konsep tersebut langsung ke source code proyek (mode pair-programming atau hint/latihan mandiri), lalu commit git per milestone dengan pesan yang menyebut konsep yang dipelajari. Gunakan skill ini saat user bilang "lanjut belajar <teknologi>", "lanjut proyek playground", "ajarin aku <konsep> di project ini", atau ingin melanjutkan sesi belajar yang sudah dimulai.
 metadata:
-  version: 1.2.0
+  version: 1.3.0
 ---
 
 # Playground Session Guide
@@ -46,32 +46,9 @@ Ini langkah paling penting — jangan mengajar dari `why_now` di `roadmap.yaml` 
 
 Lihat `references/teaching-mode-guide.md` untuk contoh dialog dan cara membingkai penjelasan.
 
-### Step 4: Pilih Mode Sesi
+### Step 4: Catat Teori ke README (SEBELUM kasih tugas)
 
-Default mode adalah **hint / latihan mandiri** — skill ini dirancang seperti website coding-playground: user mengetik sendiri agar terbiasa dengan syntax-nya, bukan dituliskan Claude. Langsung pakai mode ini tanpa bertanya, kecuali:
-
-- User sudah menyatakan preferensi eksplisit lain di awal ("mode pair-programming aja", dst).
-- `progress.json` sudah mencatat `mode` untuk milestone yang sedang di-resume — lanjutkan mode yang sama.
-- Konteksnya jelas butuh pair-programming (mis. konsep terlalu setup-heavy/boilerplate untuk latihan mandiri, atau user eksplisit minta contoh dulu) — dalam kasus ini, tawarkan lewat `AskUserQuestion` alih-alih otomatis pindah mode.
-
-- **Hint / latihan mandiri** (default): Claude TETAP jelaskan teori dasar konsepnya dulu (apa itu, kenapa ada, syntax/semantics dasar — sama dalamnya dengan pair-programming, lihat Step 3), baru beri arahan tugas + limitasi yang harus diperbaiki + sedikit panduan cara mengerjakannya di proyek ini (bukan solusi penuh), lalu hint bertingkat lanjutan kalau masih stuck (lihat `references/teaching-mode-guide.md` untuk mekanisme tier). User coba sendiri dulu, Claude review hasilnya (baca file + jalankan test/build), beri feedback, baru tulis kode kalau user stuck atau minta. **Hint mode bukan berarti user dilepas tanpa teori** — bedanya dengan pair-programming ada di siapa yang mengetik kode, bukan di seberapa lengkap konsep dijelaskan.
-- **Pair-programming**: Claude jelaskan konsep, lalu implementasikan langsung ke file proyek sambil menjelaskan tiap perubahan.
-
-Simpan mode yang dipilih ke `progress.json` (lewat `update_progress.py start`, lihat Step 8).
-
-### Step 5: Implementasi Nyata
-
-- Perubahan HARUS masuk ke file proyek yang sungguhan — extend fungsi/struktur yang sudah ada, JANGAN buat file demo terpisah yang tidak terhubung ke aplikasi utama.
-- Kalau mode hint/latihan mandiri: setelah user submit hasil kerjanya, Read file yang diubah, bandingkan dengan ekspektasi, beri feedback konkret merujuk ke baris/fungsi tertentu.
-
-### Step 6: Verifikasi
-
-1. Jalankan build/test/run proyek untuk membuktikan konsep sudah bekerja.
-2. Re-run reproduksi pain point dari Step 3 (kalau ada) untuk menunjukkan masalahnya sudah teratasi — ini bagian penting untuk "menutup loop" pembelajaran.
-
-### Step 7: Catat Teori ke README
-
-Sebelum commit, tulis ringkasan teori yang baru diajarkan di Step 3 ke section `## Learning Notes` di `README.md` proyek (buat section ini kalau belum ada, taruh sebelum `## Learning Trail (Git Log)`). Ini supaya penjelasan tidak hilang di riwayat chat — user bisa buka README kapan saja untuk me-review konsep yang sudah dipelajari.
+Begitu teori di Step 3 selesai dijelaskan — sebelum memberi tugas/hint ke user — tulis ringkasannya ke section `## Learning Notes` di `README.md` proyek (buat section ini kalau belum ada, taruh sebelum `## Learning Trail (Git Log)`). Tujuannya jadi **panduan tertulis yang bisa dibuka user sambil mengerjakan**, bukan cuma arsip setelah selesai — chat bisa discroll lewat, README selalu ada di proyek.
 
 Format per milestone (tambahkan sebagai subsection baru, JANGAN timpa milestone sebelumnya):
 
@@ -85,7 +62,31 @@ Format per milestone (tambahkan sebagai subsection baru, JANGAN timpa milestone 
 **Pain point yang diperbaiki:** <1-2 kalimat, kondisi sebelum vs sesudah>
 ```
 
-Tulis ini SETELAH milestone benar-benar selesai (Step 6 lolos), bukan draft di awal sesi — supaya isinya mencerminkan implementasi final, bukan rencana yang mungkin berubah saat user mengerjakan. Section ini masuk dalam commit milestone yang sama di Step 8 (jadi satu commit tetap berisi kode + catatannya).
+Bagian "Pain point yang diperbaiki" ditulis prospektif di sini (kondisi yang SEDANG diperbaiki), karena tugas belum selesai saat ini ditulis — tidak perlu ditulis ulang nanti kecuali implementasi akhir user ternyata mengambil pendekatan berbeda dari yang direncanakan (dalam kasus itu, revisi singkat section ini di Step 7 sebelum commit supaya tetap akurat).
+
+### Step 5: Pilih Mode Sesi
+
+Default mode adalah **hint / latihan mandiri** — skill ini dirancang seperti website coding-playground: user mengetik sendiri agar terbiasa dengan syntax-nya, bukan dituliskan Claude. Langsung pakai mode ini tanpa bertanya, kecuali:
+
+- User sudah menyatakan preferensi eksplisit lain di awal ("mode pair-programming aja", dst).
+- `progress.json` sudah mencatat `mode` untuk milestone yang sedang di-resume — lanjutkan mode yang sama.
+- Konteksnya jelas butuh pair-programming (mis. konsep terlalu setup-heavy/boilerplate untuk latihan mandiri, atau user eksplisit minta contoh dulu) — dalam kasus ini, tawarkan lewat `AskUserQuestion` alih-alih otomatis pindah mode.
+
+- **Hint / latihan mandiri** (default): Claude TETAP jelaskan teori dasar konsepnya dulu (apa itu, kenapa ada, syntax/semantics dasar — sama dalamnya dengan pair-programming, lihat Step 3), baru beri arahan tugas + limitasi yang harus diperbaiki + sedikit panduan cara mengerjakannya di proyek ini (bukan solusi penuh), lalu hint bertingkat lanjutan kalau masih stuck (lihat `references/teaching-mode-guide.md` untuk mekanisme tier). User coba sendiri dulu, Claude review hasilnya (baca file + jalankan test/build), beri feedback, baru tulis kode kalau user stuck atau minta. **Hint mode bukan berarti user dilepas tanpa teori** — bedanya dengan pair-programming ada di siapa yang mengetik kode, bukan di seberapa lengkap konsep dijelaskan.
+- **Pair-programming**: Claude jelaskan konsep, lalu implementasikan langsung ke file proyek sambil menjelaskan tiap perubahan.
+
+Simpan mode yang dipilih ke `progress.json` (lewat `update_progress.py start`, lihat Step 9).
+
+### Step 6: Implementasi Nyata
+
+- Perubahan HARUS masuk ke file proyek yang sungguhan — extend fungsi/struktur yang sudah ada, JANGAN buat file demo terpisah yang tidak terhubung ke aplikasi utama.
+- Kalau mode hint/latihan mandiri: setelah user submit hasil kerjanya, Read file yang diubah, bandingkan dengan ekspektasi, beri feedback konkret merujuk ke baris/fungsi tertentu.
+
+### Step 7: Verifikasi
+
+1. Jalankan build/test/run proyek untuk membuktikan konsep sudah bekerja.
+2. Re-run reproduksi pain point dari Step 3 (kalau ada) untuk menunjukkan masalahnya sudah teratasi — ini bagian penting untuk "menutup loop" pembelajaran.
+3. Cek balik section `## Learning Notes` yang ditulis di Step 4 — kalau implementasi akhir user berbeda dari yang direncanakan saat teori dijelaskan, revisi bagian "Pain point yang diperbaiki" secukupnya supaya tetap akurat.
 
 ### Step 8: Commit per Milestone
 
@@ -130,7 +131,7 @@ Untuk milestone yang perlu diulang atau di-skip, lihat subcommand `revisit` dan 
 ### HARUS
 - Ground penjelasan di kode proyek yang SUNGGUHAN, bukan contoh generik — baca dulu, baru jelaskan.
 - Jelaskan teori dasar konsep secara penuh SEBELUM memberi hint/tugas, di mode apa pun (termasuk hint/latihan mandiri) — jangan lompat langsung ke "coba cari sendiri konsep apa" tanpa mengajarkan teorinya dulu.
-- Tulis ringkasan teori tiap milestone selesai ke section `## Learning Notes` di `README.md` proyek (Step 7) — jangan biarkan penjelasan cuma ada di chat.
+- Tulis ringkasan teori ke section `## Learning Notes` di `README.md` proyek SEBELUM memberi tugas ke user (Step 4), bukan setelah selesai — supaya jadi panduan tertulis yang bisa dibuka sambil mengerjakan, jangan biarkan penjelasan cuma ada di chat.
 - Verifikasi solusi via Context7 untuk konsep spesifik yang sedang diajarkan sekarang.
 - Satu commit bersih per milestone selesai, dengan format & trailer yang konsisten.
 - Update `progress.json` lewat `update_progress.py`, bukan edit manual (supaya timestamp & state transition konsisten).
