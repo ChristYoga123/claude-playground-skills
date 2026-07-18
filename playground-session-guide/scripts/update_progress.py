@@ -35,7 +35,7 @@ def now_iso():
 def load_progress(project_dir):
     path = project_dir / "progress.json"
     if not path.exists():
-        raise SystemExit(f"[!] progress.json tidak ditemukan di {project_dir}")
+        raise SystemExit(f"[!] progress.json not found in {project_dir}")
     return path, json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -47,7 +47,7 @@ def find_milestone(data, milestone_id):
     for m in data["milestones"]:
         if m["id"] == milestone_id:
             return m
-    raise SystemExit(f"[!] Milestone '{milestone_id}' tidak ditemukan di progress.json")
+    raise SystemExit(f"[!] Milestone '{milestone_id}' not found in progress.json")
 
 
 def touch_session(data):
@@ -59,7 +59,7 @@ def cmd_start(args, project_dir):
     path, data = load_progress(project_dir)
     m = find_milestone(data, args.milestone)
     if m["status"] not in ("not_started", "in_progress", "needs_revisit", "skipped"):
-        warn(f"Milestone {args.milestone} berstatus '{m['status']}', tetap dilanjutkan.")
+        warn(f"Milestone {args.milestone} has status '{m['status']}', proceeding anyway.")
     m["status"] = "in_progress"
     if args.mode:
         m["mode"] = args.mode
@@ -108,7 +108,7 @@ def cmd_skip(args, project_dir):
     path, data = load_progress(project_dir)
     m = find_milestone(data, args.milestone)
     if m["status"] != "not_started":
-        warn(f"Milestone {args.milestone} berstatus '{m['status']}', biasanya skip dipakai untuk not_started.")
+        warn(f"Milestone {args.milestone} has status '{m['status']}', skip is usually used for not_started.")
     m["status"] = "skipped"
     if args.notes:
         m["notes"] = args.notes
@@ -119,7 +119,7 @@ def cmd_skip(args, project_dir):
 def cmd_append_milestone(args, project_dir):
     path, data = load_progress(project_dir)
     if any(m["id"] == args.id for m in data["milestones"]):
-        raise SystemExit(f"[!] Milestone id '{args.id}' sudah ada.")
+        raise SystemExit(f"[!] Milestone id '{args.id}' already exists.")
     new_milestone = {
         "id": args.id,
         "title": args.title,
@@ -136,12 +136,12 @@ def cmd_append_milestone(args, project_dir):
     if args.after:
         idx = next((i for i, m in enumerate(data["milestones"]) if m["id"] == args.after), None)
         if idx is None:
-            raise SystemExit(f"[!] Milestone '{args.after}' (untuk --after) tidak ditemukan.")
+            raise SystemExit(f"[!] Milestone '{args.after}' (for --after) not found.")
         data["milestones"].insert(idx + 1, new_milestone)
     else:
         data["milestones"].append(new_milestone)
     save_progress(path, data)
-    success(f"Milestone {args.id} ditambahkan ke progress.json. Ingat update roadmap.yaml juga secara manual.")
+    success(f"Milestone {args.id} added to progress.json. Remember to update roadmap.yaml manually too.")
 
 
 def cmd_resume_info(args, project_dir):
@@ -218,7 +218,7 @@ def main():
     args = parser.parse_args()
     project_dir = Path(args.project).resolve()
     if not project_dir.is_dir():
-        raise SystemExit(f"[!] Project dir tidak ditemukan: {project_dir}")
+        raise SystemExit(f"[!] Project dir not found: {project_dir}")
 
     args.func(args, project_dir)
 

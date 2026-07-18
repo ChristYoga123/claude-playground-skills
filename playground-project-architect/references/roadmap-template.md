@@ -1,8 +1,8 @@
-# Skema `roadmap.yaml` dan JSON Input untuk `scaffold_project.py`
+# `roadmap.yaml` Schema and JSON Input for `scaffold_project.py`
 
-`roadmap.yaml` adalah dokumen naratif yang ditulis langsung oleh Claude (bukan lewat script, bukan di-parse balik oleh script manapun — kecuali `scaffold_project.py` yang menerima datanya sebagai JSON lalu menulis representasi YAML-nya). Isinya boleh berubah/ditambah manual oleh Claude kapan saja (mis. saat `playground-session-guide` menemukan scope creep dan perlu menambah milestone baru).
+`roadmap.yaml` is a narrative document written directly by Claude (not through a script, not parsed back by any script — except `scaffold_project.py`, which receives its data as JSON and writes the YAML representation). Its content may be changed/added to manually by Claude at any time (e.g., when `playground-session-guide` finds scope creep and needs to add a new milestone).
 
-## Struktur `roadmap.yaml`
+## `roadmap.yaml` Structure
 
 ```yaml
 project:
@@ -12,16 +12,16 @@ project:
   created_at: "2026-07-18"
 
 theme_rationale: |
-  Proyek URL shortener dipilih karena secara alami akan menghadapi concurrency
-  saat traffic naik, kebutuhan caching untuk redirect yang sering diakses, dan
-  rate limiting untuk mencegah abuse — use-case nyata untuk goroutines, channels,
-  sync primitives, dan integrasi Redis.
+  The URL shortener project was chosen because it will naturally face concurrency
+  as traffic grows, a need for caching frequently-accessed redirects, and rate
+  limiting to prevent abuse — real use cases for goroutines, channels, sync
+  primitives, and Redis integration.
 
 context7_libraries_consulted:
   - id: /golang/go
-    note: "verifikasi idiomatic net/http, context, testing package versi saat ini"
+    note: "verify idiomatic net/http, context, and testing package for the current version"
   - id: /redis/go-redis
-    note: "verifikasi pola client Redis idiomatic untuk milestone caching"
+    note: "verify the idiomatic Redis client pattern for the caching milestone"
 
 milestones:
   - id: m00
@@ -29,36 +29,36 @@ milestones:
     concepts: [go modules, net/http basics, project layout]
     prerequisites: []
     why_now: >
-      Butuh titik awal yang bisa dijalankan sebelum menambah fitur apa pun.
+      Need a runnable starting point before adding any feature.
   - id: m01
     title: "In-memory URL store & short code generation"
     concepts: [maps, structs, basic hashing/encoding]
     prerequisites: [m00]
     why_now: >
-      Proyek butuh cara menyimpan mapping short-code -> long URL sebelum bisa
-      melakukan redirect apa pun.
+      The project needs a way to store the short-code -> long URL mapping
+      before it can do any redirecting at all.
   - id: m02
     title: "Concurrent-safe store with goroutines & mutex"
     concepts: [goroutines, sync.Mutex, race conditions]
     prerequisites: [m01]
     why_now: >
-      Server menerima banyak request bersamaan; map biasa di Go tidak aman
-      diakses concurrent — akan terlihat race condition saat di-load test.
+      The server receives many concurrent requests; a plain Go map isn't safe
+      for concurrent access — a race condition will show up under load testing.
 ```
 
-Field wajib per milestone: `id` (format `m00`, `m01`, ...), `title` (Bahasa Inggris, jadi label commit), `concepts` (list string, Bahasa Inggris/istilah teknis), `prerequisites` (list id milestone lain), `why_now` (Bahasa Indonesia, naratif, konkret).
+Required fields per milestone: `id` (format `m00`, `m01`, ...), `title` (English, becomes the commit label), `concepts` (list of strings, English/technical terms), `prerequisites` (list of other milestone ids), `why_now` (English, narrative, concrete).
 
-## Skema JSON untuk `scaffold_project.py`
+## JSON Schema for `scaffold_project.py`
 
-Script menerima roadmap sebagai JSON via `--roadmap-json` (satu baris/string JSON valid), dengan bentuk:
+The script accepts the roadmap as JSON via `--roadmap-json` (a single valid JSON string), shaped like:
 
 ```json
 {
   "title": "URL Shortener with Caching & Rate Limiting",
-  "theme_rationale": "Proyek URL shortener dipilih karena ...",
+  "theme_rationale": "The URL shortener project was chosen because ...",
   "context7_libraries_consulted": [
-    {"id": "/golang/go", "note": "verifikasi idiomatic net/http, context, testing package versi saat ini"},
-    {"id": "/redis/go-redis", "note": "verifikasi pola client Redis idiomatic untuk milestone caching"}
+    {"id": "/golang/go", "note": "verify idiomatic net/http, context, and testing package for the current version"},
+    {"id": "/redis/go-redis", "note": "verify the idiomatic Redis client pattern for the caching milestone"}
   ],
   "milestones": [
     {
@@ -66,21 +66,21 @@ Script menerima roadmap sebagai JSON via `--roadmap-json` (satu baris/string JSO
       "title": "Project scaffolding & Hello World HTTP server",
       "concepts": ["go modules", "net/http basics", "project layout"],
       "prerequisites": [],
-      "why_now": "Butuh titik awal yang bisa dijalankan sebelum menambah fitur apa pun."
+      "why_now": "Need a runnable starting point before adding any feature."
     },
     {
       "id": "m01",
       "title": "In-memory URL store & short code generation",
       "concepts": ["maps", "structs", "basic hashing/encoding"],
       "prerequisites": ["m00"],
-      "why_now": "Proyek butuh cara menyimpan mapping short-code -> long URL sebelum bisa melakukan redirect apa pun."
+      "why_now": "The project needs a way to store the short-code -> long URL mapping before it can do any redirecting at all."
     }
   ]
 }
 ```
 
-Catatan penting:
-- Milestone `m00` HARUS ada di list ini dan mewakili skeleton yang sudah diverifikasi jalan pada Step 5 SKILL.md — `scaffold_project.py` otomatis menandainya `completed` di `progress.json` (dengan `commit_sha` dari commit awal yang dibuat script) karena skeleton sudah terbukti berfungsi sebelum scaffold dijalankan.
-- Semua milestone selain `m00` mulai dengan status `not_started`.
-- `id`, `title`, `concepts` dalam Bahasa Inggris (dipakai juga sebagai kosakata commit message nanti). `why_now` dan `theme_rationale` dalam Bahasa Indonesia.
-- Urutan milestone di JSON menentukan urutan tampil di `roadmap.yaml` dan `progress.json` — usahakan sudah terurut dasar → mahir.
+Important notes:
+- Milestone `m00` MUST be present in this list and represent the skeleton already verified to run in SKILL.md Step 5 — `scaffold_project.py` automatically marks it `completed` in `progress.json` (with the `commit_sha` from the initial commit the script makes) since the skeleton was already proven to work before the scaffold ran.
+- All milestones other than `m00` start with status `not_started`.
+- `id`, `title`, `concepts`, `why_now`, and `theme_rationale` are all written in English (the `id`/`title`/`concepts` vocabulary is also reused in commit messages later).
+- The order of milestones in the JSON determines their display order in `roadmap.yaml` and `progress.json` — keep them ordered basics → mastery.

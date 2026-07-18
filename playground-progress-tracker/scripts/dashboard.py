@@ -37,7 +37,7 @@ def find_project(root, tech_slug):
     project_dir = root / tech / slug
     progress_path = project_dir / "progress.json"
     if not progress_path.exists():
-        raise SystemExit(f"[!] Proyek '{tech_slug}' tidak ditemukan di {root}")
+        raise SystemExit(f"[!] Project '{tech_slug}' not found in {root}")
     return project_dir, json.loads(progress_path.read_text(encoding="utf-8"))
 
 
@@ -58,7 +58,7 @@ def progress_bar(done, total, width=10):
 
 def format_minutes(total_minutes):
     hours, minutes = divmod(total_minutes, 60)
-    return f"{hours} jam {minutes} menit"
+    return f"{hours}h {minutes}m"
 
 
 def extract_why_now(roadmap_path, milestone_id):
@@ -95,29 +95,29 @@ def cmd_show(args, root):
 
     width = 62
     print("+" + "=" * width + "+")
-    title_line = f"Dashboard Belajar: {proj['title']} ({proj['tech']})"
+    title_line = f"Learning Dashboard: {proj['title']} ({proj['tech']})"
     print("|  " + title_line.ljust(width - 2) + "|")
     print("+" + "=" * width + "+")
     print("|" + " " * width + "|")
-    print("|  " + f"Selesai       : {counts['completed']} milestone".ljust(width - 2) + "|")
-    print("|  " + f"Sedang Jalan  : {counts['in_progress']} milestone".ljust(width - 2) + "|")
-    print("|  " + f"Perlu Revisit : {counts['needs_revisit']} milestone".ljust(width - 2) + "|")
-    print("|  " + f"Belum Mulai   : {counts['not_started']} milestone".ljust(width - 2) + "|")
+    print("|  " + f"Completed     : {counts['completed']} milestone".ljust(width - 2) + "|")
+    print("|  " + f"In Progress   : {counts['in_progress']} milestone".ljust(width - 2) + "|")
+    print("|  " + f"Needs Revisit : {counts['needs_revisit']} milestone".ljust(width - 2) + "|")
+    print("|  " + f"Not Started   : {counts['not_started']} milestone".ljust(width - 2) + "|")
     print("|" + " " * width + "|")
-    print("|  " + f"Total Waktu   : {format_minutes(proj.get('total_time_minutes', 0))}".ljust(width - 2) + "|")
+    print("|  " + f"Total Time    : {format_minutes(proj.get('total_time_minutes', 0))}".ljust(width - 2) + "|")
     print("|  " + f"Progress      : {bar}".ljust(width - 2) + "|")
     print("|" + " " * width + "|")
     print("+" + "-" * width + "+")
     if nxt:
         why_now = extract_why_now(project_dir / "roadmap.yaml", nxt["id"])
-        print("|  " + f"Milestone Berikutnya: {nxt['id']} - {nxt['title']}".ljust(width - 2) + "|")
+        print("|  " + f"Next Milestone: {nxt['id']} - {nxt['title']}".ljust(width - 2) + "|")
         if why_now:
             for line in wrap_text(why_now, width - 4):
                 print("|  " + line.ljust(width - 2) + "|")
     else:
-        print("|  " + "Semua milestone selesai!".ljust(width - 2) + "|")
+        print("|  " + "All milestones completed!".ljust(width - 2) + "|")
     print("|" + " " * width + "|")
-    print("|  " + f"Sesi Terakhir: {proj.get('last_session_at', '')[:10]}".ljust(width - 2) + "|")
+    print("|  " + f"Last Session: {proj.get('last_session_at', '')[:10]}".ljust(width - 2) + "|")
     print("+" + "=" * width + "+")
 
 
@@ -138,15 +138,15 @@ def wrap_text(text, width):
 
 def cmd_list(args, root):
     projects = discover_projects(root)
-    print("Programming Playground - Semua Proyek Belajar")
+    print("Programming Playground - All Learning Projects")
     print("=" * 64)
     print()
     if not projects:
-        print("Belum ada proyek. Gunakan skill playground-project-architect untuk memulai.")
+        print("No projects yet. Use the playground-project-architect skill to get started.")
         regenerate_index(root, projects)
         return
 
-    header = f"{'Tech':<10} {'Slug':<16} {'Judul':<22} {'Progress':<12} {'Sesi Terakhir':<14} Berikutnya"
+    header = f"{'Tech':<10} {'Slug':<16} {'Title':<22} {'Progress':<12} {'Last Session':<14} Next"
     print(header)
     print("-" * len(header))
 
@@ -157,7 +157,7 @@ def cmd_list(args, root):
         counts = milestone_counts(milestones)
         total = len(milestones)
         nxt = next_milestone(milestones)
-        next_label = f"{nxt['id']}: {nxt['title']}" if nxt else "Selesai semua"
+        next_label = f"{nxt['id']}: {nxt['title']}" if nxt else "All completed"
         pct = round(counts["completed"] / total * 100) if total else 0
         progress_label = f"{counts['completed']}/{total} ({pct}%)"
         last_session = proj.get("last_session_at", "")[:10]
@@ -169,8 +169,8 @@ def cmd_list(args, root):
 
     print()
     overall_pct = round(total_done / total_milestones * 100) if total_milestones else 0
-    print(f"Total: {len(projects)} proyek, {total_done}/{total_milestones} milestone "
-          f"selesai ({overall_pct}%), {total_minutes} menit belajar")
+    print(f"Total: {len(projects)} projects, {total_done}/{total_milestones} milestones "
+          f"completed ({overall_pct}%), {total_minutes} minutes learned")
 
     regenerate_index(root, projects)
 
@@ -178,7 +178,7 @@ def cmd_list(args, root):
 def cmd_recommend(args, root):
     projects = discover_projects(root)
     if not projects:
-        print("Belum ada proyek. Gunakan skill playground-project-architect untuk memulai.")
+        print("No projects yet. Use the playground-project-architect skill to get started.")
         return
 
     in_progress_candidates = []
@@ -204,14 +204,14 @@ def cmd_recommend(args, root):
 
     if in_progress_candidates:
         proj, m = in_progress_candidates[0]
-        print(f"Rekomendasi: lanjutkan milestone {m['id']} ({m['title']}) "
-              f"di proyek {proj['tech']}/{proj['slug']}")
-        print("  -> sesi ini masih in_progress dari sebelumnya.")
+        print(f"Recommendation: continue milestone {m['id']} ({m['title']}) "
+              f"in project {proj['tech']}/{proj['slug']}")
+        print("  -> this session is still in_progress from before.")
     elif revisit_candidates:
         proj, m = revisit_candidates[0]
-        print(f"Rekomendasi: revisit milestone {m['id']} ({m['title']}) "
-              f"di proyek {proj['tech']}/{proj['slug']}")
-        print("  -> milestone ini ditandai perlu di-review ulang.")
+        print(f"Recommendation: revisit milestone {m['id']} ({m['title']}) "
+              f"in project {proj['tech']}/{proj['slug']}")
+        print("  -> this milestone is marked as needing review.")
     else:
         most_recent = max(projects, key=lambda p: p[1]["project"].get("last_session_at", ""))
         project_dir, data = most_recent
@@ -219,15 +219,15 @@ def cmd_recommend(args, root):
         nxt = next_milestone(data["milestones"])
         if nxt:
             why_now = extract_why_now(project_dir / "roadmap.yaml", nxt["id"])
-            print(f"Rekomendasi: lanjutkan proyek {proj['tech']}/{proj['slug']} "
-                  f"(aktivitas terbaru), milestone {nxt['id']}: {nxt['title']}")
+            print(f"Recommendation: continue project {proj['tech']}/{proj['slug']} "
+                  f"(most recent activity), milestone {nxt['id']}: {nxt['title']}")
             if why_now:
                 print(f"  why_now: {why_now}")
         else:
-            print(f"Proyek {proj['tech']}/{proj['slug']} sudah menyelesaikan semua milestone!")
+            print(f"Project {proj['tech']}/{proj['slug']} has completed all milestones!")
 
     for proj, idle_days in idle_candidates:
-        print(f"\nReminder: proyek {proj['tech']}/{proj['slug']} sudah {idle_days} hari tidak disentuh.")
+        print(f"\nReminder: project {proj['tech']}/{proj['slug']} hasn't been touched in {idle_days} days.")
 
 
 def regenerate_index(root, projects=None):
@@ -259,7 +259,7 @@ def regenerate_index(root, projects=None):
 
 def cmd_render_index(args, root):
     regenerate_index(root)
-    log(f"Index ditulis ke {root / 'README.md'}")
+    log(f"Index written to {root / 'README.md'}")
 
 
 def main():

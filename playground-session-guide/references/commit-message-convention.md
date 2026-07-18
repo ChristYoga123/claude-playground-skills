@@ -1,55 +1,55 @@
-# Konvensi Commit per Milestone
+# Per-Milestone Commit Convention
 
 ## Format
 
 ```
-<milestone-id>: <ringkasan konsep, Bahasa Inggris, singkat>
+<milestone-id>: <short concept summary, English>
 
-<body: 1-3 kalimat, boleh Bahasa Indonesia, jelaskan pain point yang
-diperbaiki dan apa yang dipelajari>
+<body: 1-3 sentences in English, explain the pain point fixed
+and what was learned>
 
 Milestone-Id: <milestone-id>
 ```
 
-## Contoh
+## Example
 
 ```
 m02: Add mutex to protect concurrent map access
 
-Store.Get()/Set() sebelumnya race saat diakses banyak goroutine sekaligus
-(kelihatan jelas pakai `go test -race`). Sekarang dilindungi sync.Mutex.
+Store.Get()/Set() previously raced when accessed by many goroutines at
+once (clearly visible with `go test -race`). Now protected by sync.Mutex.
 
 Milestone-Id: m02
 ```
 
-Contoh revisit:
+Revisit example:
 ```
 revisit(m02): Re-explain mutex vs RWMutex tradeoff
 
-Milestone m02 di-revisit karena sebelumnya masih bingung soal kapan pakai
-RWMutex vs Mutex biasa. Ditambahkan RWMutex + benchmark perbandingan.
+Milestone m02 was revisited because it was still unclear when to use
+RWMutex vs a plain Mutex. Added RWMutex plus a comparison benchmark.
 
 Milestone-Id: m02
 ```
 
-## Aturan
+## Rules
 
-- Subject baris pertama: `<id>: <title milestone>` atau ringkasan yang jelas kalau sedikit berbeda dari `title` di roadmap — tetap dalam Bahasa Inggris supaya `git log --oneline` konsisten dan mudah dibaca sebagai jejak teknis.
-- Body boleh campur Bahasa Indonesia untuk narasi, tapi istilah teknis/nama fungsi tetap apa adanya (Bahasa Inggris).
-- Trailer `Milestone-Id: <id>` WAJIB ada — dipakai `playground-progress-tracker` dan `git log --grep "Milestone-Id: m02"` untuk lookup cepat.
-- Satu milestone = satu commit. Kalau butuh multiple commit teknis saat eksplorasi (coba-coba), squash jadi satu sebelum menyelesaikan milestone, atau gunakan `git commit --amend` selama belum lanjut ke milestone berikutnya.
-- Jangan campur perubahan dari 2 milestone berbeda dalam 1 commit.
+- First-line subject: `<id>: <milestone title>` or a clear summary if slightly different from the roadmap's `title` — always in English so `git log --oneline` stays consistent and reads well as a technical trail.
+- Body is written in English; technical terms/function names stay as-is.
+- The `Milestone-Id: <id>` trailer is REQUIRED — used by `playground-progress-tracker` and `git log --grep "Milestone-Id: m02"` for quick lookup.
+- One milestone = one commit. If multiple exploratory commits pile up while trying things out, squash them into one before finishing the milestone, or use `git commit --amend` as long as you haven't moved on to the next milestone.
+- Never mix changes from two different milestones in one commit.
 
-## Cara Membuat Commit (contoh Bash)
+## How to Make the Commit (Bash example)
 
 ```bash
-git add <file-file yang relevan dengan milestone ini>
-git commit -m "m02: Add mutex to protect concurrent map access" -m "Store.Get()/Set() sebelumnya race saat diakses banyak goroutine sekaligus (kelihatan jelas pakai \`go test -race\`). Sekarang dilindungi sync.Mutex.
+git add <files relevant to this milestone>
+git commit -m "m02: Add mutex to protect concurrent map access" -m "Store.Get()/Set() previously raced when accessed by many goroutines at once (clearly visible with \`go test -race\`). Now protected by sync.Mutex.
 
 Milestone-Id: m02"
 ```
 
-Ambil short SHA setelahnya untuk dicatat ke `progress.json`:
+Grab the short SHA afterward to record in `progress.json`:
 ```bash
 git rev-parse --short HEAD
 ```

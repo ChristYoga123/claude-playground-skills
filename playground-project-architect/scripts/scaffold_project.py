@@ -100,7 +100,7 @@ def build_progress(tech, slug, title, project_rel_path, roadmap, now_iso):
             "completed_at": now_iso if is_m00 else None,
             "duration_minutes": None,
             "commit_sha": None,
-            "notes": "Skeleton awal, diverifikasi jalan sebelum scaffold." if is_m00 else "",
+            "notes": "Initial skeleton, verified to run before scaffolding." if is_m00 else "",
         })
     return {
         "project": {
@@ -210,17 +210,17 @@ def main():
     playground_root = project_dir.parent.parent
     project_rel_path = f"{args.tech}/{args.slug}"
 
-    log(f"Menulis roadmap.yaml di {project_dir}")
+    log(f"Writing roadmap.yaml at {project_dir}")
     write_roadmap_yaml(project_dir / "roadmap.yaml", args.tech, args.slug, args.title, roadmap, created_at)
 
-    log("Menulis progress.json")
+    log("Writing progress.json")
     progress = build_progress(args.tech, args.slug, args.title, project_rel_path, roadmap, now_iso)
     write_progress_json(project_dir / "progress.json", progress)
 
-    log("Menulis README.md")
+    log("Writing README.md")
     write_readme(project_dir / "README.md", args.title, args.tech, roadmap["theme_rationale"], args.run_command)
 
-    log("git init & commit awal")
+    log("git init & initial commit")
     if not (project_dir / ".git").exists():
         run_git(["init"], project_dir)
     run_git(["add", "-A"], project_dir)
@@ -228,22 +228,22 @@ def main():
     m00 = roadmap["milestones"][0]
     commit_subject = f"{m00['id']}: {m00['title']}"
     commit_body = (
-        "Skeleton awal proyek, diverifikasi bisa dijalankan.\n\n"
+        "Initial project skeleton, verified to run.\n\n"
         f"Milestone-Id: {m00['id']}"
     )
     run_git(["commit", "-m", commit_subject, "-m", commit_body], project_dir)
     commit_sha = run_git(["rev-parse", "--short", "HEAD"], project_dir)
 
-    log(f"Update commit_sha m00 -> {commit_sha}")
+    log(f"Updating commit_sha m00 -> {commit_sha}")
     progress["milestones"][0]["commit_sha"] = commit_sha
     write_progress_json(project_dir / "progress.json", progress)
     run_git(["add", "progress.json"], project_dir)
     run_git(["commit", "--amend", "--no-edit"], project_dir)
 
-    log("Regenerasi index programming-playground/README.md")
+    log("Regenerating programming-playground/README.md index")
     regenerate_index(playground_root)
 
-    success(f"Proyek '{args.title}' siap di {project_dir}")
+    success(f"Project '{args.title}' is ready at {project_dir}")
 
 
 if __name__ == "__main__":

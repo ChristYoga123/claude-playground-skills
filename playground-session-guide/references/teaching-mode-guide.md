@@ -1,56 +1,58 @@
-# Mekanisme Mode Sesi & Contoh Dialog
+# Session Mode Mechanics & Example Dialogue
 
-## Mode Pair-Programming
+> Note: the example dialogue below is written in English for documentation purposes. In actual sessions, Claude converses with the user in Indonesian (the user's preferred language), while code and technical terms stay in English.
 
-Alur: jelaskan → implementasikan → verifikasi bersama. Cocok untuk konsep yang benar-benar baru bagi user atau saat user ingin progres cepat.
+## Pair-Programming Mode
 
-Contoh alur (Bahasa Indonesia untuk narasi, kode/istilah tetap Inggris):
+Flow: explain → implement → verify together. Good for concepts that are genuinely new to the user or when the user wants fast progress.
 
-> "Sekarang di `store.go`, fungsi `Get()` dan `Set()` kita akses map `urls` langsung tanpa proteksi apa pun. Kalau aku jalankan `go test -race ./...` sekarang..."
+Example flow:
+
+> "Right now in `store.go`, the functions `Get()` and `Set()` access the `urls` map directly with no protection at all. If I run `go test -race ./...` now..."
 >
-> *(jalankan test, tunjukkan race detector menyala)*
+> *(run the test, show the race detector firing)*
 >
-> "Nah, ini yang disebut race condition — dua goroutine baca-tulis map yang sama secara bersamaan, hasilnya tidak terdefinisi dan bisa crash. Solusinya kita pakai `sync.Mutex` untuk mengunci akses ke map ini. Aku tambahkan sekarang di `store.go`..."
+> "This is what's called a race condition — two goroutines reading and writing the same map at the same time produce undefined results and can crash. The fix is to use `sync.Mutex` to lock access to this map. Let me add that now in `store.go`..."
 >
-> *(edit file, jelaskan tiap baris yang berubah)*
+> *(edit the file, explain each changed line)*
 >
-> "Sekarang jalankan lagi race detector-nya..."
+> "Now let's run the race detector again..."
 >
-> *(jalankan ulang, tunjukkan sudah bersih)*
+> *(re-run, show it's clean now)*
 
-## Mode Hint / Latihan Mandiri
+## Hint / Self-Practice Mode
 
-Alur: deskripsikan tugas + limitasi → hint bertingkat (progressive reveal) → user coba sendiri → review → feedback.
+Flow: describe the task + limitation → tiered hints (progressive reveal) → user tries it themselves → review → feedback.
 
-### Tier Hint
+### Hint Tiers
 
-**Wajib sebelum Tier 1: Teori dasar konsep.** Mode hint BUKAN "cari sendiri tanpa penjelasan" — user tetap harus diajarkan teorinya (apa itu, kenapa ada, syntax/semantics dasar) seperti di mode pair-programming, dengan analogi kalau membantu. Bedanya dengan pair-programming cuma di siapa yang mengetik kode, bukan di seberapa dalam teori dijelaskan. Ini bagian dari Step 3 (grounding di pain point) dan harus tampil SEBELUM Tier 1 diberikan, bukan digabung jadi satu kalimat tanya.
+**Required before Tier 1: the concept's underlying theory.** Hint mode is NOT "figure it out yourself with no explanation" — the user still needs to be taught the theory (what it is, why it exists, basic syntax/semantics) just like in pair-programming mode, with an analogy when it helps. The difference from pair-programming is only in who types the code, not in how deeply the theory is explained. This is part of Step 4 (grounding in the pain point) and must appear BEFORE Tier 1 is given, not folded into a single question.
 
-Contoh urutan lengkap untuk kasus race condition di atas:
+Example of the full sequence for the race-condition case above:
 
-> **Teori dulu:** "Di Go, kalau beberapa goroutine baca-tulis data yang sama secara bersamaan tanpa proteksi, itu disebut *race condition* — hasilnya tidak terdefinisi dan program bisa crash atau kasih data salah tanpa error yang jelas. Go punya beberapa cara melindungi data bersama, salah satunya `sync.Mutex`: sebuah 'kunci' yang cuma boleh dipegang satu goroutine dalam satu waktu. Goroutine yang mau akses data panggil `Lock()` dulu (menunggu kalau sedang dipegang goroutine lain), lalu `Unlock()` setelah selesai."
+> **Theory first:** "In Go, when multiple goroutines read and write the same data concurrently without protection, that's called a *race condition* — the result is undefined and the program can crash or produce wrong data without a clear error. Go has several ways to protect shared data, one of them is `sync.Mutex`: a 'lock' that only one goroutine can hold at a time. A goroutine that wants to access the data calls `Lock()` first (waiting if another goroutine currently holds it), then `Unlock()` when done."
 >
-> **Tier 1 — Arahan tugas + sedikit panduan** (diberikan langsung setelah teori, jangan dipisah sesi):
-> "Sekarang lihat fungsi `Get()` dan `Set()` di `store.go` — keduanya akses map `urls` tanpa proteksi ini. Tugasmu: tambahkan proteksi itu ke struct `Store` dan pakai di kedua fungsi. Sedikit arah supaya tidak buntu: kuncinya biasanya jadi field di struct yang sama dengan data yang dilindungi, dan dikunci/dibuka di awal-akhir tiap fungsi yang menyentuh data itu."
+> **Tier 1 — Task direction + a bit of guidance** (given right after the theory, don't split it into a separate turn):
+> "Now look at the `Get()` and `Set()` functions in `store.go` — both access the `urls` map without this protection. Your task: add that protection to the `Store` struct and use it in both functions. A small nudge so you don't get stuck: the lock usually becomes a field in the same struct as the data it protects, and gets locked/unlocked at the start/end of every function that touches that data."
 
-**Tier 2 — Bentuk API** (kalau user minta hint lagi / terlihat stuck):
-> "Petunjuk lebih spesifik: `sync` package punya tipe `Mutex` dengan method `Lock()` dan `Unlock()`. Coba tambahkan sebagai field di struct `Store`, lalu panggil di awal/akhir tiap method yang akses map."
+**Tier 2 — API shape** (if the user asks for another hint / looks stuck):
+> "More specific hint: the `sync` package has a `Mutex` type with `Lock()` and `Unlock()` methods. Try adding it as a field in the `Store` struct, then call it at the start/end of every method that accesses the map."
 
-**Tier 3 — Solusi lengkap** (hanya kalau diminta eksplisit "kasih lihat solusinya" / user sudah mencoba dan tetap stuck):
-> Tampilkan kode lengkap dengan penjelasan tiap bagian.
+**Tier 3 — Full solution** (only if explicitly requested — "show me the solution" — or the user has tried and is still stuck):
+> Show the complete code with an explanation of each part.
 
-**Aturan tier**: jangan lompat ke tier 3 sebelum user benar-benar minta atau sudah mencoba dan gagal. Progresif, bukan langsung kasih jawaban. Tapi teori dasar BUKAN bagian dari progresi ini — itu selalu tampil duluan, penuh, di semua tier.
+**Tier rule**: don't jump to tier 3 before the user genuinely asks for it or has tried and failed. Progressive, not an immediate answer. But the base theory is NOT part of this progression — it always appears first, in full, at every tier.
 
-### Review Hasil Kerja User
+### Reviewing the User's Work
 
-1. `Read` file yang diubah user.
-2. Jalankan build/test untuk verifikasi objektif.
-3. Beri feedback merujuk baris/fungsi spesifik — apresiasi bagian yang benar, jelaskan kenapa bagian yang salah (kalau ada) salah, kaitkan balik ke konsep.
-4. Kalau user salah paham konsep intinya (bukan cuma typo), tawarkan penjelasan ulang singkat sebelum lanjut, atau tandai milestone `needs_revisit` kalau setelah beberapa percobaan masih belum klik.
+1. `Read` the file the user changed.
+2. Run build/test for objective verification.
+3. Give feedback referencing specific lines/functions — acknowledge what's correct, explain why anything wrong is wrong, tie it back to the concept.
+4. If the user misunderstood the core concept (not just a typo), offer a short re-explanation before moving on, or mark the milestone `needs_revisit` if it still isn't clicking after a few attempts.
 
-## Kapan Pilih Mode Apa (Panduan Bertanya)
+## When to Choose Which Mode (Question Guide)
 
-Default global adalah **hint / latihan mandiri** — langsung pakai tanpa bertanya. Kecuali:
-- Konsepnya benar-benar baru/asing dan setup-heavy (banyak boilerplate yang tidak berhubungan langsung dengan konsep inti) → boleh tawarkan pair-programming lewat `AskUserQuestion`, beri konteks singkat kenapa.
-- User secara eksplisit minta mode tertentu → hormati langsung tanpa bertanya ulang.
-- `progress.json` sudah mencatat mode untuk milestone yang di-resume → lanjutkan mode yang sama.
+The global default is **hint / self-practice** — use it directly without asking. Except when:
+- The concept is genuinely new/unfamiliar and setup-heavy (lots of boilerplate unrelated to the core concept) → it's fine to offer pair-programming via `AskUserQuestion`, with a short reason why.
+- The user explicitly requests a specific mode → honor it directly without re-asking.
+- `progress.json` already recorded a mode for the milestone being resumed → continue with the same mode.

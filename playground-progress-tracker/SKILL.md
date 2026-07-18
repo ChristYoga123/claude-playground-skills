@@ -1,93 +1,93 @@
 ---
 name: playground-progress-tracker
-description: Melacak dan menampilkan progress belajar di semua proyek programming-playground sekaligus (satu proyek per teknologi yang sedang dipelajari), membaca roadmap.yaml dan progress.json tiap proyek, menghitung statistik, menampilkan dashboard ASCII per-proyek maupun gabungan semua proyek, serta merekomendasikan proyek/milestone mana yang sebaiknya dilanjutkan. Gunakan skill ini saat user bertanya "progress belajar aku gimana", "dashboard playground", "project apa aja yang lagi aku kerjain", atau "lanjutin belajar yang mana ya".
+description: Tracks and displays learning progress across all programming-playground projects at once (one project per technology being learned), reading each project's roadmap.yaml and progress.json, computing statistics, showing an ASCII dashboard per-project or combined across all projects, and recommending which project/milestone to continue next. Use this skill when the user asks "how's my learning progress", "playground dashboard", "what projects am I working on", or "which one should I continue".
 metadata:
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 # Playground Progress Tracker
 
-Skill ini menampilkan progress belajar di semua proyek `programming-playground/` — satu proyek biasanya mewakili satu teknologi yang sedang dipelajari (Go, PostgreSQL, Kafka, dst), masing-masing berjalan independen.
+This skill displays learning progress across all `programming-playground/` projects — each project usually represents one technology being learned (Go, PostgreSQL, Kafka, etc.), each running independently.
 
-Skill ini bersifat **read-mostly**: penyelesaian milestone yang sesungguhnya (perubahan status jadi `completed`) selalu harus lewat `playground-session-guide` supaya tiap status `completed` punya commit git yang membuktikannya. Skill ini hanya boleh melakukan koreksi klerikal kecil secara eksplisit kalau diminta user (mis. salah catat durasi).
+This skill is **read-mostly**: actually completing a milestone (changing its status to `completed`) must always go through `playground-session-guide` so every `completed` status has a git commit proving it. This skill may only make small clerical corrections explicitly when the user asks (e.g., a wrongly recorded duration).
 
 ## Workspace
 
-Default lokasi workspace adalah `~/programming-playground/` (dibaca otomatis oleh `scripts/dashboard.py`). Kalau user memakai lokasi lain (mis. di dalam direktori project tertentu), tambahkan `--root <path>` di semua pemanggilan script pada skill ini.
+The default workspace location is `~/programming-playground/` (read automatically by `scripts/dashboard.py`). If the user uses a different location (e.g., inside a specific project directory), add `--root <path>` to every script invocation in this skill.
 
-## Kapan Menggunakan Skill Ini
+## When To Use This Skill
 
-- User tanya "progress belajar aku gimana", "dashboard playground"
-- User tanya "project apa aja yang lagi aku kerjain"
-- User tanya "lanjutin belajar yang mana ya" / minta rekomendasi
-- Setelah `playground-project-architect` atau `playground-session-guide` selesai bekerja, skill lain itu sudah cukup untuk merujuk ke sini — skill ini tidak perlu dipanggil otomatis, hanya saat user eksplisit minta lihat progress.
+- User asks "how's my learning progress", "playground dashboard"
+- User asks "what projects am I working on"
+- User asks "which one should I continue" / wants a recommendation
+- After `playground-project-architect` or `playground-session-guide` finish their work, those skills already point here on their own — this skill doesn't need to be invoked automatically, only when the user explicitly asks to see progress.
 
 ## Instructions
 
-### Step 1: Discover Semua Proyek
+### Step 1: Discover All Projects
 
 ```bash
 python3 scripts/dashboard.py list
 ```
 
-Script ini men-glob `programming-playground/*/*/progress.json` — tidak ada registry terpisah, jadi selalu up to date dengan apa yang benar-benar ada di disk.
+This script globs `programming-playground/*/*/progress.json` — there's no separate registry, so it's always up to date with what's actually on disk.
 
-Kalau tidak ada proyek sama sekali, arahkan user ke `playground-project-architect`.
+If there are no projects at all, point the user to `playground-project-architect`.
 
-### Step 2: Dashboard Satu Proyek
+### Step 2: Single-Project Dashboard
 
-Kalau user tanya soal satu teknologi/proyek spesifik:
+If the user asks about one specific technology/project:
 
 ```bash
 python3 scripts/dashboard.py show <tech>/<slug>
 ```
 
-Menampilkan ASCII box: jumlah milestone per status, total waktu belajar, progress bar, milestone saat ini + berikutnya (ambil narasi `why_now` singkat dari `roadmap.yaml` untuk memberi konteks, bukan sekadar id).
+Shows an ASCII box: milestone counts per status, total learning time, a progress bar, the current + next milestone (pull a short `why_now` narrative from `roadmap.yaml` for context, not just the id).
 
-Lihat `references/dashboard-format.md` untuk format persis.
+See `references/dashboard-format.md` for the exact format.
 
-### Step 3: Dashboard Semua Proyek
+### Step 3: All-Projects Dashboard
 
-Kalau user tanya progress secara umum (tanpa sebut teknologi tertentu):
+If the user asks about progress in general (without naming a specific technology):
 
 ```bash
 python3 scripts/dashboard.py list
 ```
 
-Tampilkan tabel gabungan (tech, slug, judul, % selesai, sesi terakhir, milestone berikutnya) + total keseluruhan (total proyek, total milestone selesai, total waktu belajar semua proyek).
+Show a combined table (tech, slug, title, % complete, last session, next milestone) + overall totals (total projects, total milestones completed, total learning time across all projects).
 
-### Step 4: Rekomendasi
+### Step 4: Recommendation
 
 ```bash
 python3 scripts/dashboard.py recommend
 ```
 
-Logika (murni berbasis state, BUKAN kurikulum tetap — tidak ada urutan "harus belajar A dulu baru B"):
-1. Ada milestone `in_progress` di proyek mana pun → rekomendasikan lanjutkan itu dulu (sesi yang belum selesai).
-2. Kalau tidak ada, ada milestone `needs_revisit` → rekomendasikan sesi review.
-3. Kalau tidak ada, pilih proyek dengan `last_session_at` paling baru yang masih punya milestone `not_started` (momentum — lanjutkan yang baru saja disentuh).
-4. Proyek yang idle >14 hari (dari `last_session_at`) ditandai sebagai reminder halus, bukan dipaksa harus dikerjakan duluan.
+Logic (purely state-based, NOT a fixed curriculum — there's no "must learn A before B" ordering):
+1. Any project has an `in_progress` milestone → recommend continuing that first (an unfinished session).
+2. If none, any project has a `needs_revisit` milestone → recommend a review session.
+3. If none, pick the project with the most recent `last_session_at` that still has a `not_started` milestone (momentum — continue what was just touched).
+4. A project idle for >14 days (based on `last_session_at`) is flagged as a gentle reminder, not forced to be worked on first.
 
-Sampaikan rekomendasi dalam Bahasa Indonesia, natural, sertakan alasan singkat (mis. "kamu lagi di tengah milestone m02 di proyek Go, lanjutin itu dulu yuk").
+Deliver the recommendation in Indonesian (the user's conversational language), naturally, with a short reason (e.g., "you're in the middle of milestone m02 in your Go project, let's continue that").
 
-### Step 5: Regenerasi Index
+### Step 5: Regenerate the Index
 
-Setiap kali `list` atau `show` dijalankan, script otomatis menulis ulang `programming-playground/README.md` sebagai efek samping (self-healing index, tidak bergantung skill lain untuk memicunya).
+Every time `list` or `show` runs, the script automatically rewrites `programming-playground/README.md` as a side effect (a self-healing index that doesn't depend on another skill to trigger it).
 
-## Aturan
+## Rules
 
-### HARUS
-- Selalu baca `progress.json` sebagai sumber kebenaran untuk status/statistik (bukan `roadmap.yaml`, yang hanya untuk konteks naratif).
-- Arahkan user ke `playground-session-guide` untuk benar-benar menyelesaikan/mengubah status milestone.
-- Rekomendasi murni berbasis state proyek, jangan asumsikan urutan belajar lintas teknologi.
+### MUST
+- Always read `progress.json` as the source of truth for status/statistics (not `roadmap.yaml`, which is only for narrative context).
+- Point the user to `playground-session-guide` to actually complete/change a milestone's status.
+- Base recommendations purely on project state, never assume a learning order across different technologies.
 
-### JANGAN
-- Jangan tandai milestone `completed` dari skill ini tanpa commit git yang menyertainya — itu tugas `playground-session-guide`.
-- Jangan buat registry/file index tambahan selain `programming-playground/README.md` yang auto-generated.
-- Jangan memaksa urutan "belajar X dulu baru boleh Y" antar teknologi berbeda.
+### MUST NOT
+- Never mark a milestone `completed` from this skill without an accompanying git commit — that's `playground-session-guide`'s job.
+- Never create an additional registry/index file besides the auto-generated `programming-playground/README.md`.
+- Never force a "learn X before Y" ordering across different technologies.
 
 ## Quality Checklist
 
-- [ ] Dashboard menampilkan data yang cocok dengan isi `progress.json` terkini (bukan cache basi)
-- [ ] Rekomendasi menyebutkan proyek + milestone + alasan singkat
-- [ ] `programming-playground/README.md` ter-update setelah pemanggilan
+- [ ] The dashboard shows data matching the current `progress.json` contents (not a stale cache)
+- [ ] The recommendation names a project + milestone + a short reason
+- [ ] `programming-playground/README.md` is updated after the call

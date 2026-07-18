@@ -1,118 +1,118 @@
 ---
 name: playground-project-architect
-description: Merancang proyek belajar baru untuk teknologi apa pun (bahasa pemrograman, database, message broker, dsb) dengan memilih tema proyek yang cukup kompleks, menyusun roadmap milestone terurut dari dasar sampai mahir yang berakar pada konsep nyata teknologi tersebut (diverifikasi via Context7), lalu men-scaffold skeleton proyek yang bisa langsung dijalankan (git init, README, roadmap.yaml, progress.json) di dalam programming-playground/<tech>/<project-slug>/. Gunakan skill ini saat user bilang "aku mau belajar <teknologi>", "mulai proyek belajar <teknologi>", "bikin playground project untuk <teknologi>", atau minta dirancangkan kurikulum/roadmap untuk teknologi baru yang belum ada proyeknya.
+description: Designs a new learning project for any technology (programming language, database, message broker, etc.) by picking a sufficiently complex project theme, building an ordered roadmap of milestones from basics to mastery grounded in that technology's real concepts (verified via Context7), then scaffolding a runnable project skeleton (git init, README, roadmap.yaml, progress.json) inside programming-playground/<tech>/<project-slug>/. Use this skill when the user says "I want to learn <technology>", "start a learning project for <technology>", "make a playground project for <technology>", or asks for a curriculum/roadmap to be designed for a new technology with no existing project.
 metadata:
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 # Playground Project Architect
 
-Skill ini merancang proyek belajar baru untuk teknologi apa pun (bahasa pemrograman, database, message broker, tool infra, dsb), dengan filosofi **project-based playground**: bukan tutorial dengan contoh kode terpisah-pisah, tapi SATU proyek nyata yang tumbuh dari skeleton kecil menjadi kompleks seiring konsep-konsep dipelajari. Setiap konsep nanti diimplementasikan langsung ke dalam proyek ini oleh skill pasangannya, `playground-session-guide`.
+This skill designs a new learning project for any technology (programming language, database, message broker, infra tool, etc.), following a **project-based playground** philosophy: not a tutorial made of disconnected code snippets, but ONE real project that grows from a small skeleton into something more complex as concepts are learned. Each concept is later implemented directly into this project by the companion skill, `playground-session-guide`.
 
-Skill ini HANYA menangani desain awal (tema + roadmap + scaffold). Untuk menjalankan sesi belajar di proyek yang sudah ada, gunakan `playground-session-guide`. Untuk melihat progress semua proyek, gunakan `playground-progress-tracker`.
+This skill ONLY handles the initial design (theme + roadmap + scaffold). To run a learning session on an existing project, use `playground-session-guide`. To see progress across all projects, use `playground-progress-tracker`.
 
 ## Workspace
 
-Semua proyek belajar disimpan di direktori workspace `programming-playground/`. Default-nya `~/programming-playground/` (home directory user). Sebelum memakai default ini:
-1. Cek apakah user sudah punya folder `programming-playground/` di tempat lain (mis. di dalam direktori project yang sedang dibuka saat ini) — kalau ada, pakai itu.
-2. Kalau user pernah menyebutkan lokasi custom sebelumnya, pakai itu secara konsisten.
-3. Kalau tidak ada indikasi apa pun, pakai `~/programming-playground/` dan beri tahu user lokasinya.
+All learning projects are stored in the `programming-playground/` workspace directory. The default is `~/programming-playground/` (the user's home directory). Before using this default:
+1. Check whether the user already has a `programming-playground/` folder elsewhere (e.g., inside the project directory currently open) — if so, use that.
+2. If the user has previously mentioned a custom location, use it consistently.
+3. If there's no indication either way, use `~/programming-playground/` and tell the user the location.
 
-Selanjutnya di skill ini, `<PLAYGROUND_ROOT>` merujuk ke direktori ini.
+For the rest of this skill, `<PLAYGROUND_ROOT>` refers to this directory.
 
-## Kapan Menggunakan Skill Ini
+## When To Use This Skill
 
-- User bilang "aku mau belajar Go/Rust/PostgreSQL/Kafka/dst"
-- User minta "bikin playground project untuk X"
-- User minta dirancangkan roadmap/kurikulum belajar teknologi baru
-- **Bukan** untuk melanjutkan proyek yang sudah ada (itu tugas `playground-session-guide`) — selalu cek dulu di Step 1
+- User says "I want to learn Go/Rust/PostgreSQL/Kafka/etc"
+- User asks to "make a playground project for X"
+- User asks for a roadmap/curriculum to be designed for a new technology
+- **Not** for continuing an existing project (that's `playground-session-guide`'s job) — always check Step 1 first
 
 ## Instructions
 
-### Step 1: Klarifikasi Scope & Cek Proyek Existing
+### Step 1: Clarify Scope & Check for an Existing Project
 
-Sebelum merancang apa pun:
+Before designing anything:
 
-1. Cek apakah sudah ada proyek untuk teknologi ini: `ls <PLAYGROUND_ROOT>/<tech-slug>/` (glob juga `*/progress.json` untuk melihat semua proyek yang ada).
-2. **Jika sudah ada proyek untuk tech ini** — jangan scaffold ulang. Beri tahu user proyeknya sudah ada, tawarkan untuk lanjut dengan `playground-session-guide`, atau (kalau user memang eksplisit minta proyek KEDUA untuk tech yang sama, mis. mau eksperimen dengan tema berbeda) lanjutkan dengan slug proyek yang berbeda.
-3. Kumpulkan info berikut (pakai `AskUserQuestion` kalau belum jelas dari permintaan user):
-   - Nama & versi teknologi (mis. "Go 1.22", "PostgreSQL", "Kafka")
-   - Level pengalaman user dengan teknologi ini (pemula total / pernah coba dikit / berpengalaman di bahasa lain tapi baru di ini)
-   - Preferensi domain proyek kalau ada (mis. "aku suka bikin sesuatu yang berhubungan dengan e-commerce") — kalau tidak ada preferensi, lanjut ke Step 3 untuk mengusulkan.
+1. Check whether a project already exists for this technology: `ls <PLAYGROUND_ROOT>/<tech-slug>/` (also glob `*/progress.json` to see all existing projects).
+2. **If a project already exists for this tech** — don't scaffold a new one. Tell the user the project already exists, offer to continue with `playground-session-guide`, or (only if the user explicitly wants a SECOND project for the same tech, e.g. to experiment with a different theme) proceed with a different project slug.
+3. Gather the following info (use `AskUserQuestion` if not already clear from the request):
+   - Technology name & version (e.g., "Go 1.22", "PostgreSQL", "Kafka")
+   - The user's experience level with this technology (total beginner / tried it a little / experienced in other languages but new to this one)
+   - Project domain preference if any (e.g., "I like building things related to e-commerce") — if there's no preference, move to Step 3 to propose one.
 
-### Step 2: Riset via Context7
+### Step 2: Research via Context7
 
-Sebelum merancang tema atau roadmap, riset teknologi ini dulu:
+Before designing a theme or roadmap, research the technology first:
 
-1. `resolve-library-id` untuk teknologi utama (dan 1-2 library ekosistem yang kemungkinan akan dipakai, mis. driver database, client library).
-2. `query-docs` untuk memahami:
-   - Struktur proyek idiomatic untuk teknologi ini
-   - Tooling standar (build tool, test framework, package manager)
-   - **Fitur-fitur unggulan/khas** teknologi ini — ini penting karena akan jadi target akhir roadmap (mis. Go dikenal karena goroutines/channels; PostgreSQL karena indexing/transactions/JSONB; Kafka karena partitioning/consumer groups/delivery guarantees)
+1. `resolve-library-id` for the main technology (and 1-2 ecosystem libraries likely to be used, e.g., a database driver, a client library).
+2. `query-docs` to understand:
+   - The idiomatic project structure for this technology
+   - Standard tooling (build tool, test framework, package manager)
+   - **Flagship/distinctive features** of this technology — important because these become the roadmap's eventual target (e.g., Go is known for goroutines/channels; PostgreSQL for indexing/transactions/JSONB; Kafka for partitioning/consumer groups/delivery guarantees)
 
-Simpan temuan ini secara ringkas — akan dicatat di `roadmap.yaml` sebagai `context7_libraries_consulted`.
+Keep a concise record of these findings — they'll be noted in `roadmap.yaml` as `context7_libraries_consulted`.
 
-### Step 3: Pilih Tema Proyek
+### Step 3: Choose the Project Theme
 
-Lihat `references/project-theme-heuristics.md` untuk heuristik detail. Ringkasnya:
+See `references/project-theme-heuristics.md` for detailed heuristics. In short:
 
-1. Kerja **mundur dari fitur unggulan** teknologi (hasil Step 2), bukan maju dari ide aplikasi generik. Tema proyek harus punya jalan alami menuju fitur-fitur tersebut.
-2. Cek ukuran: skeleton awal (`m00`) harus bisa jalan dalam <30 menit, tapi proyek harus punya titik ekstensi natural ke arah kompleksitas (jangan terlalu trivial seperti "hello world", jangan terlalu luas seperti "platform SaaS lengkap").
-3. Susun 1-2 opsi tema konkret dan **konfirmasi ke user** lewat `AskUserQuestion` sebelum lanjut merancang roadmap penuh — jangan langsung putuskan sepihak.
+1. Work **backward from the technology's flagship features** (from Step 2's research), not forward from a generic app idea. The project theme must have a natural path toward those features.
+2. Check the sizing: the initial skeleton (`m00`) should run in under 30 minutes, but the project needs a natural extension point toward complexity (don't go as trivial as "hello world", nor as broad as "a full SaaS platform").
+3. Draft 1-2 concrete theme options and **confirm with the user** via `AskUserQuestion` before designing the full roadmap — don't decide unilaterally.
 
-### Step 4: Rancang Roadmap
+### Step 4: Design the Roadmap
 
-Lihat `references/roadmap-template.md` untuk skema lengkap dan contoh. Ringkasnya:
+See `references/roadmap-template.md` for the full schema and examples. In short:
 
-1. Brainstorm daftar konsep dari dasar → mahir berdasarkan riset Step 2, mengarah ke fitur-fitur unggulan teknologi tsb.
-2. Kelompokkan jadi **8-15 milestone**, tiap milestone berisi 1-3 konsep yang berkaitan, estimasi 30-90 menit pengerjaan.
-3. Tiap milestone WAJIB punya field `why_now`: limitasi/kebutuhan KONKRET dari state proyek saat ini yang baru bisa diselesaikan dengan konsep milestone ini. Ini kunci filosofi "project-based" — bukan "sekarang kita belajar X" tapi "proyek kita butuh X karena Y".
-4. Sequencing: `m00` = skeleton yang jalan. Lalu pola berulang: **tambah fitur dengan cara naif → fitur itu kelihatan bermasalah/terbatas di kondisi realistis → pelajari konsep untuk memperbaikinya**. Tutup dengan 1-2 milestone kualitas (testing, error handling, observability) supaya proyek selalu berakhir dalam kondisi presentable.
-5. Tiap milestone punya `prerequisites` (list milestone id yang harus selesai dulu).
+1. Brainstorm a list of concepts from basics → mastery based on Step 2's research, leading toward that technology's flagship features.
+2. Group them into **8-15 milestones**, each covering 1-3 related concepts, estimated at 30-90 minutes of work.
+3. Every milestone MUST have a `why_now` field: a CONCRETE limitation/need in the project's current state that only this milestone's concept can resolve. This is the core of the "project-based" philosophy — not "now let's learn X" but "our project needs X because Y".
+4. Sequencing: `m00` = a runnable skeleton. Then a repeating pattern: **add a feature the naive way → that feature turns out to be problematic/limited under realistic conditions → learn the concept that fixes it**. Close with 1-2 quality milestones (testing, error handling, observability) so the project always ends in a presentable state.
+5. Every milestone has `prerequisites` (a list of milestone ids that must be completed first).
 
-### Step 5: Scaffold Proyek
+### Step 5: Scaffold the Project
 
-1. Tentukan `tech-slug` (kebab-case, mis. `go`, `postgresql`, `rabbitmq`) dan `project-slug` (kebab-case dari tema, mis. `url-shortener`).
-2. Path proyek: `<PLAYGROUND_ROOT>/<tech-slug>/<project-slug>/`. Pastikan belum ada.
-3. **Jalankan langsung command init asli teknologi tsb via Bash** (bukan hardcoded di script generik) — mis. `go mod init <module>`, `cargo init`, `npm init`, dsb — sesuai hasil riset Step 2. Buat skeleton `m00` yang benar-benar bisa dijalankan (mis. HTTP server "hello world", koneksi DB dasar).
-4. **Verifikasi skeleton benar-benar jalan** (run/build) sebelum lanjut.
-5. Jalankan scaffold meta-files:
+1. Determine the `tech-slug` (kebab-case, e.g., `go`, `postgresql`, `rabbitmq`) and `project-slug` (kebab-case from the theme, e.g., `url-shortener`).
+2. Project path: `<PLAYGROUND_ROOT>/<tech-slug>/<project-slug>/`. Make sure it doesn't already exist.
+3. **Run the technology's actual init command directly via Bash** (not hardcoded in a generic script) — e.g., `go mod init <module>`, `cargo init`, `npm init`, etc. — based on Step 2's research. Create an `m00` skeleton that genuinely runs (e.g., a "hello world" HTTP server, a basic DB connection).
+4. **Verify the skeleton actually runs** (run/build) before proceeding.
+5. Run the scaffold meta-files script:
    ```bash
    python3 scripts/scaffold_project.py \
      --project-dir "<PLAYGROUND_ROOT>/<tech-slug>/<project-slug>" \
-     --tech "<tech-slug>" --slug "<project-slug>" --title "<judul proyek>" \
-     --roadmap-json '<json roadmap yang sudah dirancang di Step 4>'
+     --tech "<tech-slug>" --slug "<project-slug>" --title "<project title>" \
+     --roadmap-json '<the roadmap JSON designed in Step 4>'
    ```
-   Script ini akan menulis `roadmap.yaml`, `progress.json` (milestone pertama `m00` langsung berstatus `completed` karena skeleton sudah diverifikasi jalan), `README.md`, `git init` + commit awal, dan regenerasi index `programming-playground/README.md`.
-6. Format JSON roadmap yang diharapkan script: lihat `references/roadmap-template.md` bagian "Schema JSON untuk scaffold_project.py".
+   This script writes `roadmap.yaml`, `progress.json` (the first milestone `m00` is immediately marked `completed` since the skeleton was already verified to run), `README.md`, runs `git init` + an initial commit, and regenerates the `programming-playground/README.md` index.
+6. For the JSON roadmap format the script expects, see `references/roadmap-template.md`, section "JSON Schema for scaffold_project.py".
 
 ### Step 6: Wrap-up
 
-1. Ringkas roadmap secara naratif ke user dalam Bahasa Indonesia: tema proyek, kenapa tema ini cocok untuk teknologi ini, daftar milestone singkat.
-2. Arahkan user ke `playground-session-guide` untuk mulai milestone pertama (m01), dan sebutkan `playground-progress-tracker` untuk cek dashboard kapan saja.
+1. Summarize the roadmap narratively to the user (in Indonesian, the conversational language): the project theme, why this theme fits this technology, a short milestone list.
+2. Point the user to `playground-session-guide` to start the first milestone (m01), and mention `playground-progress-tracker` for checking the dashboard anytime.
 
-## Aturan
+## Rules
 
-### HARUS
-- Riset via Context7 SEBELUM merancang tema/roadmap — jangan andalkan pengetahuan training data untuk hal versi-spesifik.
-- Setiap milestone punya `why_now` yang konkret, terhubung ke state proyek, bukan penjelasan generik.
-- Konfirmasi tema ke user sebelum merancang roadmap penuh (satu round-trip, jangan berlarut-larut).
-- Verifikasi skeleton `m00` benar-benar bisa dijalankan sebelum scaffold selesai.
-- Cek proyek existing dulu sebelum scaffold (Step 1) — jangan menimpa proyek yang sudah ada.
+### MUST
+- Research via Context7 BEFORE designing the theme/roadmap — don't rely on training-data knowledge for version-specific details.
+- Every milestone has a concrete `why_now`, tied to the project's state, not a generic explanation.
+- Confirm the theme with the user before designing the full roadmap (one round-trip, don't drag it out).
+- Verify the `m00` skeleton genuinely runs before the scaffold is considered done.
+- Check for an existing project first before scaffolding (Step 1) — don't overwrite an existing project.
 
-### JANGAN
-- Jangan pakai kurikulum hardcoded/template tetap — setiap teknologi dirancang ulang dari riset Context7-nya sendiri.
-- Jangan buat skeleton `m00` melebihi cakupannya sendiri (fitur milestone lain belum boleh diimplementasikan di awal).
-- Jangan pilih domain proyek yang terlalu trivial (tidak akan pernah butuh fitur lanjutan) atau terlalu luas (tidak akan pernah selesai skeleton-nya).
-- Jangan scaffold ulang proyek yang tech-nya sudah ada tanpa konfirmasi eksplisit dari user.
+### MUST NOT
+- Never use a hardcoded/fixed curriculum template — every technology's curriculum is redesigned from its own Context7 research.
+- Never make the `m00` skeleton exceed its own scope (other milestones' features must not be implemented upfront).
+- Never pick a project domain that's too trivial (will never need advanced features) or too broad (its skeleton will never be finished).
+- Never re-scaffold a project for a tech that already has one without explicit confirmation from the user.
 
 ## Quality Checklist
 
-Sebelum menyatakan proyek siap:
-- [ ] Riset Context7 sudah dilakukan dan dicatat di `roadmap.yaml`
-- [ ] Tema sudah dikonfirmasi user
-- [ ] 8-15 milestone dengan `why_now` konkret per milestone
-- [ ] Skeleton `m00` benar-benar berjalan (sudah dites)
-- [ ] `roadmap.yaml`, `progress.json`, `README.md` tertulis
-- [ ] Git repo ter-init dengan commit awal
-- [ ] Index `programming-playground/README.md` ter-update
+Before declaring the project ready:
+- [ ] Context7 research has been done and recorded in `roadmap.yaml`
+- [ ] The theme has been confirmed with the user
+- [ ] 8-15 milestones with a concrete `why_now` per milestone
+- [ ] The `m00` skeleton genuinely runs (tested)
+- [ ] `roadmap.yaml`, `progress.json`, `README.md` are written
+- [ ] The git repo is initialized with an initial commit
+- [ ] The `programming-playground/README.md` index is updated
