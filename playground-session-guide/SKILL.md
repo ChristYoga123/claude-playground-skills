@@ -2,7 +2,7 @@
 name: playground-session-guide
 description: Memandu satu sesi belajar nyata di dalam proyek playground yang sudah ada — membaca roadmap.yaml dan progress.json proyek, menentukan milestone berikutnya, menjelaskan konsepnya dengan berakar pada limitasi nyata di kode proyek saat ini (bukan contoh kode terpisah), mengimplementasikan konsep tersebut langsung ke source code proyek (mode pair-programming atau hint/latihan mandiri), lalu commit git per milestone dengan pesan yang menyebut konsep yang dipelajari. Gunakan skill ini saat user bilang "lanjut belajar <teknologi>", "lanjut proyek playground", "ajarin aku <konsep> di project ini", atau ingin melanjutkan sesi belajar yang sudah dimulai.
 metadata:
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 # Playground Session Guide
@@ -54,7 +54,7 @@ Default mode adalah **hint / latihan mandiri** — skill ini dirancang seperti w
 - `progress.json` sudah mencatat `mode` untuk milestone yang sedang di-resume — lanjutkan mode yang sama.
 - Konteksnya jelas butuh pair-programming (mis. konsep terlalu setup-heavy/boilerplate untuk latihan mandiri, atau user eksplisit minta contoh dulu) — dalam kasus ini, tawarkan lewat `AskUserQuestion` alih-alih otomatis pindah mode.
 
-- **Hint / latihan mandiri** (default): Claude jelaskan tugas + limitasi yang harus diperbaiki, beri hint bertingkat (lihat `references/teaching-mode-guide.md` untuk mekanisme tier), user coba sendiri dulu, Claude review hasilnya (baca file + jalankan test/build), beri feedback, baru tulis kode kalau user stuck atau minta.
+- **Hint / latihan mandiri** (default): Claude TETAP jelaskan teori dasar konsepnya dulu (apa itu, kenapa ada, syntax/semantics dasar — sama dalamnya dengan pair-programming, lihat Step 3), baru beri arahan tugas + limitasi yang harus diperbaiki + sedikit panduan cara mengerjakannya di proyek ini (bukan solusi penuh), lalu hint bertingkat lanjutan kalau masih stuck (lihat `references/teaching-mode-guide.md` untuk mekanisme tier). User coba sendiri dulu, Claude review hasilnya (baca file + jalankan test/build), beri feedback, baru tulis kode kalau user stuck atau minta. **Hint mode bukan berarti user dilepas tanpa teori** — bedanya dengan pair-programming ada di siapa yang mengetik kode, bukan di seberapa lengkap konsep dijelaskan.
 - **Pair-programming**: Claude jelaskan konsep, lalu implementasikan langsung ke file proyek sambil menjelaskan tiap perubahan.
 
 Simpan mode yang dipilih ke `progress.json` (lewat `update_progress.py start`, lihat Step 8).
@@ -111,6 +111,7 @@ Untuk milestone yang perlu diulang atau di-skip, lihat subcommand `revisit` dan 
 
 ### HARUS
 - Ground penjelasan di kode proyek yang SUNGGUHAN, bukan contoh generik — baca dulu, baru jelaskan.
+- Jelaskan teori dasar konsep secara penuh SEBELUM memberi hint/tugas, di mode apa pun (termasuk hint/latihan mandiri) — jangan lompat langsung ke "coba cari sendiri konsep apa" tanpa mengajarkan teorinya dulu.
 - Verifikasi solusi via Context7 untuk konsep spesifik yang sedang diajarkan sekarang.
 - Satu commit bersih per milestone selesai, dengan format & trailer yang konsisten.
 - Update `progress.json` lewat `update_progress.py`, bukan edit manual (supaya timestamp & state transition konsisten).
