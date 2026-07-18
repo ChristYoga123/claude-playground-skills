@@ -2,7 +2,7 @@
 name: playground-session-guide
 description: Memandu satu sesi belajar nyata di dalam proyek playground yang sudah ada — membaca roadmap.yaml dan progress.json proyek, menentukan milestone berikutnya, menjelaskan konsepnya dengan berakar pada limitasi nyata di kode proyek saat ini (bukan contoh kode terpisah), mengimplementasikan konsep tersebut langsung ke source code proyek (mode pair-programming atau hint/latihan mandiri), lalu commit git per milestone dengan pesan yang menyebut konsep yang dipelajari. Gunakan skill ini saat user bilang "lanjut belajar <teknologi>", "lanjut proyek playground", "ajarin aku <konsep> di project ini", atau ingin melanjutkan sesi belajar yang sudah dimulai.
 metadata:
-  version: 1.3.0
+  version: 1.4.0
 ---
 
 # Playground Session Guide
@@ -46,23 +46,23 @@ Ini langkah paling penting — jangan mengajar dari `why_now` di `roadmap.yaml` 
 
 Lihat `references/teaching-mode-guide.md` untuk contoh dialog dan cara membingkai penjelasan.
 
-### Step 4: Catat Teori ke README (SEBELUM kasih tugas)
+### Step 4: Tulis Catatan Lengkap ke Folder `notes/` (SEBELUM kasih tugas)
 
-Begitu teori di Step 3 selesai dijelaskan — sebelum memberi tugas/hint ke user — tulis ringkasannya ke section `## Learning Notes` di `README.md` proyek (buat section ini kalau belum ada, taruh sebelum `## Learning Trail (Git Log)`). Tujuannya jadi **panduan tertulis yang bisa dibuka user sambil mengerjakan**, bukan cuma arsip setelah selesai — chat bisa discroll lewat, README selalu ada di proyek.
+Begitu teori di Step 3 selesai dijelaskan — sebelum memberi tugas/hint ke user — tulis catatan lengkap ke file terpisah di proyek. Tujuannya jadi **panduan tertulis mandiri yang bisa dibuka user sambil mengerjakan**, bukan ringkasan tipis yang cuma mengulang chat.
 
-Format per milestone (tambahkan sebagai subsection baru, JANGAN timpa milestone sebelumnya):
-
-```markdown
-### m01: Proper var declarations & constants
-
-**Konsep:** var, const, basic types, type inference vs explicit typing
-
-<ringkasan teori singkat 2-4 kalimat — apa itu, kapan dipakai, dalam Bahasa Indonesia>
-
-**Pain point yang diperbaiki:** <1-2 kalimat, kondisi sebelum vs sesudah>
-```
-
-Bagian "Pain point yang diperbaiki" ditulis prospektif di sini (kondisi yang SEDANG diperbaiki), karena tugas belum selesai saat ini ditulis — tidak perlu ditulis ulang nanti kecuali implementasi akhir user ternyata mengambil pendekatan berbeda dari yang direncanakan (dalam kasus itu, revisi singkat section ini di Step 7 sebelum commit supaya tetap akurat).
+1. Buat folder `notes/<milestone-id>-<slug-singkat>/` di root proyek kalau belum ada (mis. `notes/m01-var-const/`, `notes/m08-channel-waitgroup/`). Buat juga folder induk `notes/` kalau proyek belum punya.
+2. Tulis `notes/<id>-<slug>/README.md` dengan struktur:
+   - **Judul & konsep** — daftar istilah teknis yang dicakup.
+   - **Penjelasan lengkap** — definisi, kenapa konsep ini ada, kapan dipakai. Boleh dan didorong pakai **contoh dummy/generik** yang berdiri sendiri (tidak harus dari proyek ini) kalau itu membuat konsep lebih jelas dipahami sebelum masuk ke konteks proyek. Tulis sederhana tapi detail, hindari jargon tanpa penjelasan.
+   - **Code block** untuk tiap contoh (baik dummy maupun cuplikan nyata dari proyek).
+   - **Diagram** — pakai Mermaid (```mermaid) kalau konsepnya punya alur/struktur yang lebih mudah dipahami secara visual. **Wajib** untuk konsep concurrency (goroutine, channel, select, worker pool, context) — gambarkan data flow antar goroutine/channel pakai `sequenceDiagram` atau `flowchart` (mis. goroutine mana kirim ke channel mana, kapan `select` memilih cabang mana). Untuk struct/pointer, diagram referensi memori (siapa menunjuk ke mana) juga sangat membantu. Untuk konsep yang murni sintaksis (var/const dasar) diagram opsional — jangan dipaksakan kalau tidak menambah kejelasan.
+   - Section terakhir **`## Tugas di Proyek Ini`** — baru di sini dikaitkan ke pain point nyata proyek dari Step 3 (fungsi/file spesifik yang harus diubah), dengan sedikit panduan progresif (bukan solusi penuh, ikuti tier hint di `references/teaching-mode-guide.md` kalau mode hint).
+3. Update `README.md` root proyek: section `## Learning Notes` cukup jadi **daftar link**, jangan duplikasi isi lengkap di situ:
+   ```markdown
+   ## Learning Notes
+   - [m01: Proper var declarations & constants](./notes/m01-var-const/README.md)
+   ```
+4. Bagian "Tugas di Proyek Ini" ditulis prospektif (kondisi yang SEDANG diperbaiki) karena tugas belum selesai saat ini ditulis. Kalau implementasi akhir user berbeda dari rencana, revisi bagian itu secukupnya di Step 7 sebelum commit — bagian teori/diagram di atasnya biasanya tidak perlu berubah karena tidak bergantung pada implementasi spesifik user.
 
 ### Step 5: Pilih Mode Sesi
 
@@ -86,7 +86,7 @@ Simpan mode yang dipilih ke `progress.json` (lewat `update_progress.py start`, l
 
 1. Jalankan build/test/run proyek untuk membuktikan konsep sudah bekerja.
 2. Re-run reproduksi pain point dari Step 3 (kalau ada) untuk menunjukkan masalahnya sudah teratasi — ini bagian penting untuk "menutup loop" pembelajaran.
-3. Cek balik section `## Learning Notes` yang ditulis di Step 4 — kalau implementasi akhir user berbeda dari yang direncanakan saat teori dijelaskan, revisi bagian "Pain point yang diperbaiki" secukupnya supaya tetap akurat.
+3. Cek balik section `## Tugas di Proyek Ini` di `notes/<id>-<slug>/README.md` yang ditulis di Step 4 — kalau implementasi akhir user berbeda dari yang direncanakan saat teori dijelaskan, revisi bagian itu secukupnya supaya tetap akurat.
 
 ### Step 8: Commit per Milestone
 
@@ -131,7 +131,8 @@ Untuk milestone yang perlu diulang atau di-skip, lihat subcommand `revisit` dan 
 ### HARUS
 - Ground penjelasan di kode proyek yang SUNGGUHAN, bukan contoh generik — baca dulu, baru jelaskan.
 - Jelaskan teori dasar konsep secara penuh SEBELUM memberi hint/tugas, di mode apa pun (termasuk hint/latihan mandiri) — jangan lompat langsung ke "coba cari sendiri konsep apa" tanpa mengajarkan teorinya dulu.
-- Tulis ringkasan teori ke section `## Learning Notes` di `README.md` proyek SEBELUM memberi tugas ke user (Step 4), bukan setelah selesai — supaya jadi panduan tertulis yang bisa dibuka sambil mengerjakan, jangan biarkan penjelasan cuma ada di chat.
+- Tulis catatan lengkap (teori + contoh + diagram kalau relevan + tugas) ke `notes/<id>-<slug>/README.md` SEBELUM memberi tugas ke user (Step 4), bukan setelah selesai — supaya jadi panduan tertulis yang bisa dibuka sambil mengerjakan. `README.md` root proyek cukup berisi link ke folder ini, jangan biarkan penjelasan cuma ada di chat.
+- Sertakan diagram Mermaid di catatan untuk konsep concurrency (goroutine/channel/select/worker pool/context) supaya data flow-nya kelihatan, bukan cuma teks.
 - Verifikasi solusi via Context7 untuk konsep spesifik yang sedang diajarkan sekarang.
 - Satu commit bersih per milestone selesai, dengan format & trailer yang konsisten.
 - Update `progress.json` lewat `update_progress.py`, bukan edit manual (supaya timestamp & state transition konsisten).
@@ -149,6 +150,6 @@ Untuk milestone yang perlu diulang atau di-skip, lihat subcommand `revisit` dan 
 - [ ] Context7 sudah dicek untuk konsep spesifik ini
 - [ ] Mode sesi (pair/hint) sudah dikonfirmasi
 - [ ] Implementasi masuk ke file proyek sungguhan, sudah diverifikasi jalan (build/test/run)
-- [ ] `README.md` proyek sudah punya ringkasan teori milestone ini di section `## Learning Notes`
+- [ ] `notes/<id>-<slug>/README.md` sudah berisi teori lengkap + contoh + tugas (dan diagram Mermaid kalau konsepnya concurrency/struktural), dan root `README.md` sudah link ke situ
 - [ ] Satu commit bersih dengan pesan sesuai konvensi
 - [ ] `progress.json` ter-update lewat script (bukan manual)
