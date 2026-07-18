@@ -1,6 +1,6 @@
 # Claude Playground Skills
 
-> Created by [@znmn](https://github.com/znmn)
+> Inspired from [@znmn](https://github.com/znmn)
 
 Three cooperating [Claude Code Skills](https://docs.claude.com/en/docs/claude-code/skills) for learning a programming language or other technology (database, message broker, infra tool, etc.) through **project-based playground** learning: instead of a tutorial with disconnected, dummy code examples, you build one real project that grows from a small skeleton into something complex as you learn each concept — every concept is implemented directly inside that same project, so you always see its actual use case and effect on your own codebase.
 
