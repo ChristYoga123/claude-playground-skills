@@ -44,7 +44,7 @@ Alur: deskripsikan tugas + limitasi → hint bertingkat (progressive reveal) →
 
 ## Kapan Pilih Mode Apa (Panduan Bertanya)
 
-Tanyakan preferensi tiap sesi (bisa beda-beda per milestone), tapi beri konteks singkat saat bertanya:
-- Kalau konsepnya benar-benar baru/asing → tawarkan pair-programming sebagai default yang direkomendasikan.
-- Kalau user sudah beberapa kali pilih hint-mode dan progress lancar → tawarkan hint-mode sebagai default berikutnya juga.
-- Selalu hormati kalau user secara eksplisit minta mode tertentu tanpa perlu ditanya ulang.
+Default global adalah **hint / latihan mandiri** — langsung pakai tanpa bertanya. Kecuali:
+- Konsepnya benar-benar baru/asing dan setup-heavy (banyak boilerplate yang tidak berhubungan langsung dengan konsep inti) → boleh tawarkan pair-programming lewat `AskUserQuestion`, beri konteks singkat kenapa.
+- User secara eksplisit minta mode tertentu → hormati langsung tanpa bertanya ulang.
+- `progress.json` sudah mencatat mode untuk milestone yang di-resume → lanjutkan mode yang sama.

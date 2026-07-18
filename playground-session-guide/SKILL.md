@@ -48,10 +48,14 @@ Lihat `references/teaching-mode-guide.md` untuk contoh dialog dan cara membingka
 
 ### Step 4: Pilih Mode Sesi
 
-Tanyakan lewat `AskUserQuestion` (kecuali user sudah menyatakan preferensi eksplisit di awal, atau `progress.json` sudah mencatat `mode` untuk milestone yang sedang di-resume):
+Default mode adalah **hint / latihan mandiri** — skill ini dirancang seperti website coding-playground: user mengetik sendiri agar terbiasa dengan syntax-nya, bukan dituliskan Claude. Langsung pakai mode ini tanpa bertanya, kecuali:
 
+- User sudah menyatakan preferensi eksplisit lain di awal ("mode pair-programming aja", dst).
+- `progress.json` sudah mencatat `mode` untuk milestone yang sedang di-resume — lanjutkan mode yang sama.
+- Konteksnya jelas butuh pair-programming (mis. konsep terlalu setup-heavy/boilerplate untuk latihan mandiri, atau user eksplisit minta contoh dulu) — dalam kasus ini, tawarkan lewat `AskUserQuestion` alih-alih otomatis pindah mode.
+
+- **Hint / latihan mandiri** (default): Claude jelaskan tugas + limitasi yang harus diperbaiki, beri hint bertingkat (lihat `references/teaching-mode-guide.md` untuk mekanisme tier), user coba sendiri dulu, Claude review hasilnya (baca file + jalankan test/build), beri feedback, baru tulis kode kalau user stuck atau minta.
 - **Pair-programming**: Claude jelaskan konsep, lalu implementasikan langsung ke file proyek sambil menjelaskan tiap perubahan.
-- **Hint / latihan mandiri**: Claude jelaskan tugas + limitasi yang harus diperbaiki, beri hint bertingkat (lihat `references/teaching-mode-guide.md` untuk mekanisme tier), user coba sendiri dulu, Claude review hasilnya (baca file + jalankan test/build), beri feedback, baru tulis kode kalau user stuck atau minta.
 
 Simpan mode yang dipilih ke `progress.json` (lewat `update_progress.py start`, lihat Step 8).
 

@@ -234,15 +234,15 @@ def regenerate_index(root, projects=None):
     if projects is None:
         projects = discover_projects(root)
     lines = [
-        "# Programming Playground — Index Proyek Belajar",
-        "_Auto-generated. Jangan edit manual, akan ditimpa oleh playground-project-architect / playground-progress-tracker._",
+        "# Programming Playground — Learning Project Index",
+        "_Auto-generated. Do not edit manually, it will be overwritten by playground-project-architect / playground-progress-tracker._",
         "",
     ]
     if not projects:
-        lines.append("Belum ada proyek. Gunakan skill `playground-project-architect` untuk memulai.")
+        lines.append("No projects yet. Use the `playground-project-architect` skill to get started.")
     else:
-        lines.append("| Tech | Proyek | Judul | Progress | Milestone Berikutnya | Sesi Terakhir |")
-        lines.append("|------|--------|-------|----------|-----------------------|----------------|")
+        lines.append("| Tech | Project | Title | Progress | Next Milestone | Last Session |")
+        lines.append("|------|---------|-------|----------|-----------------|---------------|")
         for project_dir, data in projects:
             proj = data["project"]
             milestones = data["milestones"]
@@ -250,7 +250,7 @@ def regenerate_index(root, projects=None):
             total = len(milestones)
             pct = round(counts["completed"] / total * 100) if total else 0
             nxt = next_milestone(milestones)
-            next_label = f"{nxt['id']}: {nxt['title']}" if nxt else "Selesai semua milestone"
+            next_label = f"{nxt['id']}: {nxt['title']}" if nxt else "All milestones completed"
             last_session = proj.get("last_session_at", "")[:10]
             lines.append(f"| {proj['tech']} | {proj['slug']} | {proj['title']} | "
                          f"{counts['completed']}/{total} ({pct}%) | {next_label} | {last_session} |")

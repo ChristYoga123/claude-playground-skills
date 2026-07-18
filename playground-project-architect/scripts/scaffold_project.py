@@ -124,30 +124,30 @@ def write_progress_json(path, progress):
 def write_readme(path, title, tech, theme_rationale, run_command):
     content = f"""# {title}
 
-> Proyek belajar **{tech}** dibuat lewat `playground-project-architect`.
-> Progress: lihat `progress.json` atau jalankan skill `playground-progress-tracker`.
+> A **{tech}** learning project created via `playground-project-architect`.
+> Progress: see `progress.json` or run the `playground-progress-tracker` skill.
 
-## Tema
+## Theme
 
 {theme_rationale.strip()}
 
-## Cara Menjalankan
+## Running It
 
 ```bash
 {run_command}
 ```
 
-## Struktur Belajar
+## Learning Structure
 
-Roadmap lengkap ada di [`roadmap.yaml`](./roadmap.yaml). Progress dan status tiap milestone
-ada di [`progress.json`](./progress.json).
+The full roadmap is in [`roadmap.yaml`](./roadmap.yaml). Progress and status for each milestone
+is in [`progress.json`](./progress.json).
 
-Untuk melanjutkan sesi belajar, gunakan skill `playground-session-guide`.
+To continue a learning session, use the `playground-session-guide` skill.
 
-## Jejak Belajar (Git Log)
+## Learning Trail (Git Log)
 
-Setiap milestone yang selesai adalah satu commit tersendiri — jalankan `git log --oneline`
-di folder ini untuk melihat urutan konsep yang sudah dipelajari.
+Each completed milestone is its own commit — run `git log --oneline`
+in this folder to see the sequence of concepts learned.
 """
     path.write_text(content, encoding="utf-8")
 
@@ -165,20 +165,20 @@ def regenerate_index(playground_root):
         total = len(milestones)
         pct = round(done / total * 100) if total else 0
         next_m = next((m for m in milestones if m["status"] in ("not_started", "in_progress")), None)
-        next_label = f"{next_m['id']}: {next_m['title']}" if next_m else "Selesai semua milestone"
+        next_label = f"{next_m['id']}: {next_m['title']}" if next_m else "All milestones completed"
         last_session = proj.get("last_session_at", "")[:10]
         rows.append((proj["tech"], proj["slug"], proj["title"], f"{done}/{total} ({pct}%)", next_label, last_session))
 
     lines = [
-        "# Programming Playground — Index Proyek Belajar",
-        "_Auto-generated. Jangan edit manual, akan ditimpa oleh playground-project-architect / playground-progress-tracker._",
+        "# Programming Playground — Learning Project Index",
+        "_Auto-generated. Do not edit manually, it will be overwritten by playground-project-architect / playground-progress-tracker._",
         "",
     ]
     if not rows:
-        lines.append("Belum ada proyek. Gunakan skill `playground-project-architect` untuk memulai.")
+        lines.append("No projects yet. Use the `playground-project-architect` skill to get started.")
     else:
-        lines.append("| Tech | Proyek | Judul | Progress | Milestone Berikutnya | Sesi Terakhir |")
-        lines.append("|------|--------|-------|----------|-----------------------|----------------|")
+        lines.append("| Tech | Project | Title | Progress | Next Milestone | Last Session |")
+        lines.append("|------|---------|-------|----------|-----------------|---------------|")
         for tech, slug, title, progress, next_label, last_session in rows:
             lines.append(f"| {tech} | {slug} | {title} | {progress} | {next_label} | {last_session} |")
 

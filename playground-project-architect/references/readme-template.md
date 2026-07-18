@@ -1,32 +1,32 @@
-# Template `README.md` per Proyek
+# Per-Project `README.md` Template
 
-Ditulis langsung oleh Claude (via `scaffold_project.py`) saat scaffold, boleh diperbarui manual oleh `playground-session-guide` seiring proyek berkembang (mis. update bagian "Cara Menjalankan" kalau ada dependency baru).
+Written directly by Claude (via `scaffold_project.py`) during scaffolding; may be updated manually by `playground-session-guide` as the project evolves (e.g. updating the "Running It" section when a new dependency is added).
 
 ```markdown
-# {Judul Proyek}
+# {Project Title}
 
-> Proyek belajar **{tech}** dibuat lewat `playground-project-architect`.
-> Progress: lihat `progress.json` atau jalankan `playground-progress-tracker`.
+> A **{tech}** learning project created via `playground-project-architect`.
+> Progress: see `progress.json` or run `playground-progress-tracker`.
 
-## Tema
+## Theme
 
-{theme_rationale, 2-4 kalimat}
+{theme_rationale, 2-4 sentences}
 
-## Cara Menjalankan
+## Running It
 
 ```bash
-{perintah run/build spesifik teknologi, mis. `go run .` atau `cargo run`}
+{tech-specific run/build command, e.g. `go run .` or `cargo run`}
 ```
 
-## Struktur Belajar
+## Learning Structure
 
-Roadmap lengkap ada di [`roadmap.yaml`](./roadmap.yaml). Progress dan status tiap milestone ada di [`progress.json`](./progress.json).
+The full roadmap is in [`roadmap.yaml`](./roadmap.yaml). Progress and status for each milestone is in [`progress.json`](./progress.json).
 
-Untuk melanjutkan sesi belajar, gunakan skill `playground-session-guide`.
+To continue a learning session, use the `playground-session-guide` skill.
 
-## Jejak Belajar (Git Log)
+## Learning Trail (Git Log)
 
-Setiap milestone yang selesai adalah satu commit tersendiri — jalankan `git log --oneline` di folder ini untuk melihat urutan konsep yang sudah dipelajari.
+Each completed milestone is its own commit — run `git log --oneline` in this folder to see the sequence of concepts learned.
 ```
 
-Placeholder `{tech}`, `{theme_rationale}`, dan perintah run diisi oleh `scaffold_project.py` berdasarkan argumen yang diterima dari SKILL.md Step 5.
+Placeholders `{tech}`, `{theme_rationale}`, and the run command are filled in by `scaffold_project.py` based on the arguments it receives from SKILL.md Step 5.
