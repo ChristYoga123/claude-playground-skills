@@ -2,7 +2,7 @@
 name: playground-session-guide
 description: Memandu satu sesi belajar nyata di dalam proyek playground yang sudah ada — membaca roadmap.yaml dan progress.json proyek, menentukan milestone berikutnya, menjelaskan konsepnya dengan berakar pada limitasi nyata di kode proyek saat ini (bukan contoh kode terpisah), mengimplementasikan konsep tersebut langsung ke source code proyek (mode pair-programming atau hint/latihan mandiri), lalu commit git per milestone dengan pesan yang menyebut konsep yang dipelajari. Gunakan skill ini saat user bilang "lanjut belajar <teknologi>", "lanjut proyek playground", "ajarin aku <konsep> di project ini", atau ingin melanjutkan sesi belajar yang sudah dimulai.
 metadata:
-  version: 1.1.0
+  version: 1.2.0
 ---
 
 # Playground Session Guide
@@ -69,7 +69,25 @@ Simpan mode yang dipilih ke `progress.json` (lewat `update_progress.py start`, l
 1. Jalankan build/test/run proyek untuk membuktikan konsep sudah bekerja.
 2. Re-run reproduksi pain point dari Step 3 (kalau ada) untuk menunjukkan masalahnya sudah teratasi — ini bagian penting untuk "menutup loop" pembelajaran.
 
-### Step 7: Commit per Milestone
+### Step 7: Catat Teori ke README
+
+Sebelum commit, tulis ringkasan teori yang baru diajarkan di Step 3 ke section `## Learning Notes` di `README.md` proyek (buat section ini kalau belum ada, taruh sebelum `## Learning Trail (Git Log)`). Ini supaya penjelasan tidak hilang di riwayat chat — user bisa buka README kapan saja untuk me-review konsep yang sudah dipelajari.
+
+Format per milestone (tambahkan sebagai subsection baru, JANGAN timpa milestone sebelumnya):
+
+```markdown
+### m01: Proper var declarations & constants
+
+**Konsep:** var, const, basic types, type inference vs explicit typing
+
+<ringkasan teori singkat 2-4 kalimat — apa itu, kapan dipakai, dalam Bahasa Indonesia>
+
+**Pain point yang diperbaiki:** <1-2 kalimat, kondisi sebelum vs sesudah>
+```
+
+Tulis ini SETELAH milestone benar-benar selesai (Step 6 lolos), bukan draft di awal sesi — supaya isinya mencerminkan implementasi final, bukan rencana yang mungkin berubah saat user mengerjakan. Section ini masuk dalam commit milestone yang sama di Step 8 (jadi satu commit tetap berisi kode + catatannya).
+
+### Step 8: Commit per Milestone
 
 1. Stage HANYA file yang relevan dengan milestone ini.
 2. Commit dengan format dari `references/commit-message-convention.md`:
@@ -79,7 +97,7 @@ Simpan mode yang dipilih ke `progress.json` (lewat `update_progress.py start`, l
 3. **Aturan keras: satu commit bersih per milestone selesai.** Jangan pernah commit kondisi rusak/setengah jadi sebagai milestone commit.
 4. Kalau sesi terputus sebelum milestone selesai: JANGAN commit kondisi WIP. Biarkan working tree apa adanya, catat status `in_progress` dengan `notes` yang menjelaskan progress terakhir (lewat `update_progress.py start` dengan `--notes`), supaya sesi berikutnya bisa resume dengan jelas.
 
-### Step 8: Update `progress.json`
+### Step 9: Update `progress.json`
 
 ```bash
 python3 scripts/update_progress.py complete \
@@ -96,7 +114,7 @@ python3 scripts/update_progress.py start \
 
 Untuk milestone yang perlu diulang atau di-skip, lihat subcommand `revisit` dan `skip` (dokumentasi lengkap ada di help script: `python3 scripts/update_progress.py --help`).
 
-### Step 9: Tutup Sesi
+### Step 10: Tutup Sesi
 
 1. Ringkas apa yang baru dipelajari dan bagaimana itu mengubah proyek.
 2. Beri teaser singkat `why_now` milestone berikutnya (bikin penasaran, jangan spoiler penuh).
@@ -112,6 +130,7 @@ Untuk milestone yang perlu diulang atau di-skip, lihat subcommand `revisit` dan 
 ### HARUS
 - Ground penjelasan di kode proyek yang SUNGGUHAN, bukan contoh generik — baca dulu, baru jelaskan.
 - Jelaskan teori dasar konsep secara penuh SEBELUM memberi hint/tugas, di mode apa pun (termasuk hint/latihan mandiri) — jangan lompat langsung ke "coba cari sendiri konsep apa" tanpa mengajarkan teorinya dulu.
+- Tulis ringkasan teori tiap milestone selesai ke section `## Learning Notes` di `README.md` proyek (Step 7) — jangan biarkan penjelasan cuma ada di chat.
 - Verifikasi solusi via Context7 untuk konsep spesifik yang sedang diajarkan sekarang.
 - Satu commit bersih per milestone selesai, dengan format & trailer yang konsisten.
 - Update `progress.json` lewat `update_progress.py`, bukan edit manual (supaya timestamp & state transition konsisten).
@@ -129,5 +148,6 @@ Untuk milestone yang perlu diulang atau di-skip, lihat subcommand `revisit` dan 
 - [ ] Context7 sudah dicek untuk konsep spesifik ini
 - [ ] Mode sesi (pair/hint) sudah dikonfirmasi
 - [ ] Implementasi masuk ke file proyek sungguhan, sudah diverifikasi jalan (build/test/run)
+- [ ] `README.md` proyek sudah punya ringkasan teori milestone ini di section `## Learning Notes`
 - [ ] Satu commit bersih dengan pesan sesuai konvensi
 - [ ] `progress.json` ter-update lewat script (bukan manual)
