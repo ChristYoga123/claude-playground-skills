@@ -2,7 +2,7 @@
 name: playground-session-guide
 description: Guides a single real learning session inside an existing playground project — reads the project's roadmap.yaml and progress.json, determines the next milestone, explains the concept grounded in a real limitation currently present in the project's code (not a separate code example), implements that concept directly in the project's source code (pair-programming or hint/self-practice mode), then commits per milestone with a message referencing the concept learned. Use this skill when the user says "continue learning <tech>", "continue playground project", "teach me <concept> in this project", or wants to resume a learning session already in progress.
 metadata:
-  version: 1.6.0
+  version: 1.7.0
 ---
 
 # Playground Session Guide
@@ -70,6 +70,7 @@ As soon as the Step 4 theory has been explained — before giving the user a tas
    - **Code block** for each example (both dummy and real snippets from the project).
    - **Diagram** — use Mermaid (```mermaid) when the concept has a flow/structure that's easier to grasp visually. **Required** for concurrency concepts (goroutine, channel, select, worker pool, context) — illustrate the data flow between goroutines/channels using `sequenceDiagram` or `flowchart` (e.g., which goroutine sends to which channel, when `select` picks which branch). For struct/pointer concepts, a memory-reference diagram (who points to what) also helps a lot. For purely syntactic concepts (basic var/const) a diagram is optional — don't force one if it doesn't add clarity.
    - Final section **`## Task In This Project`** — only here does it tie back to the project's real pain point from Step 4 (the specific function/file to change), with a bit of progressive guidance (not the full solution — follow the hint tiers in `references/teaching-mode-guide.md` for hint mode).
+   - Sub-section **`## Expected Output`** (REQUIRED, immediately after `## Task In This Project`) — show concretely what should be seen if the task is done correctly: the exact terminal/log output (or its pattern, if part of it is nondeterministic like timestamps or goroutine ordering), for the normal case AND relevant edge cases (e.g., the failure/retry path, not just the success path). This is what lets the user know "is this right?" without having to guess from the task description alone.
 3. Update the project's root `README.md`: the `## Learning Notes` section should just be a **list of links**, don't duplicate the full content there:
    ```markdown
    ## Learning Notes
@@ -144,7 +145,8 @@ For milestones that need to be redone or skipped, see the `revisit` and `skip` s
 ### MUST
 - Ground the explanation in the project's ACTUAL code, not a generic example — read first, then explain.
 - Explain the concept's underlying theory in full BEFORE giving a hint/task, in any mode (including hint/self-practice) — don't jump straight to "try to figure out which concept applies" without teaching the theory first.
-- Write full notes (theory + examples + diagram if relevant + task) to `notes/<id>-<slug>/README.md` BEFORE giving the task to the user (Step 5), not after it's done — so it becomes a written guide the user can open while working. The project root `README.md` should just link to it; don't let the explanation live only in chat.
+- Write full notes (theory + examples + diagram if relevant + task + expected output) to `notes/<id>-<slug>/README.md` BEFORE giving the task to the user (Step 5), not after it's done — so it becomes a written guide the user can open while working. The project root `README.md` should just link to it; don't let the explanation live only in chat.
+- Include an `## Expected Output` section in every milestone's notes — concrete output/values (normal case + relevant edge cases) proving the task was done correctly, not just a task description.
 - Include a Mermaid diagram in the notes for concurrency concepts (goroutine/channel/select/worker pool/context) so the data flow is visible, not just text.
 - Ask about the reference material source (AI research vs. the user's own reference) once at the start of the session (Step 3), unless it's already clear from the user's request context or this is a continuing session where it was already asked.
 - Verify the solution via Context7 for the specific concept being taught right now (unless the user chose their own reference — in that case Context7 becomes a supplement, not the primary source).
@@ -166,6 +168,6 @@ For milestones that need to be redone or skipped, see the `revisit` and `skip` s
 - [ ] Context7 has been checked for this specific concept (or the user's reference was used as the primary basis)
 - [ ] The session mode (pair/hint) has been confirmed
 - [ ] The implementation landed in real project files, verified to work (build/test/run)
-- [ ] `notes/<id>-<slug>/README.md` contains full theory + examples + task (and a Mermaid diagram if the concept is concurrency/structural), and the root `README.md` links to it
+- [ ] `notes/<id>-<slug>/README.md` contains full theory + examples + task + Expected Output (and a Mermaid diagram if the concept is concurrency/structural), and the root `README.md` links to it
 - [ ] One clean commit with a message following the convention
 - [ ] `progress.json` updated via the script (not manually)
