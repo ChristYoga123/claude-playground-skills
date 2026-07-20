@@ -2,7 +2,7 @@
 name: playground-session-guide
 description: Guides a single real learning session inside an existing playground project — reads the project's roadmap.yaml and progress.json, determines the next milestone, explains the concept grounded in a real limitation currently present in the project's code (not a separate code example), implements that concept directly in the project's source code (pair-programming or hint/self-practice mode), then commits per milestone with a message referencing the concept learned. Use this skill when the user says "continue learning <tech>", "continue playground project", "teach me <concept> in this project", or wants to resume a learning session already in progress.
 metadata:
-  version: 1.7.0
+  version: 1.9.0
 ---
 
 # Playground Session Guide
@@ -34,6 +34,7 @@ All learning projects live in the `programming-playground/` workspace directory 
 1. Read `roadmap.yaml` (full narrative) and `progress.json` (machine status) for that project.
 2. Determine the next milestone: prioritize any milestone with status `in_progress` (resume an interrupted session) → then `needs_revisit` milestones if the user explicitly asks for a review → then the first `not_started` milestone whose `prerequisites` are all `completed`.
 3. If the user explicitly requests a different milestone/concept (out of default order), honor that — but check its prerequisites are met first; if not, say so and confirm whether to proceed anyway.
+4. Check `project.skeleton_mode` in `roadmap.yaml` (or `project.skeleton_mode` in `progress.json`). If it's `scratch` and `m00` is still `not_started`, this session's "next milestone" IS `m00` — treat it exactly like any other milestone (Steps 3-10 below apply as normal, including the mode choice in Step 6). The project directory may contain nothing but the bare init output (e.g., an empty `go.mod`) — that itself is the "limitation" to ground Step 4 in: there's no runnable entrypoint yet.
 
 ### Step 3: Choose the Reference Material Source (once per session)
 
@@ -69,7 +70,7 @@ As soon as the Step 4 theory has been explained — before giving the user a tas
    - **Full explanation** — definition, why the concept exists, when it's used. Feel free to (and are encouraged to) use **standalone dummy/generic examples** (not necessarily from this project) when that makes the concept clearer before diving into the project's context. Write simply but with detail, avoid unexplained jargon.
    - **Code block** for each example (both dummy and real snippets from the project).
    - **Diagram** — use Mermaid (```mermaid) when the concept has a flow/structure that's easier to grasp visually. **Required** for concurrency concepts (goroutine, channel, select, worker pool, context) — illustrate the data flow between goroutines/channels using `sequenceDiagram` or `flowchart` (e.g., which goroutine sends to which channel, when `select` picks which branch). For struct/pointer concepts, a memory-reference diagram (who points to what) also helps a lot. For purely syntactic concepts (basic var/const) a diagram is optional — don't force one if it doesn't add clarity.
-   - Final section **`## Task In This Project`** — only here does it tie back to the project's real pain point from Step 4 (the specific function/file to change), with a bit of progressive guidance (not the full solution — follow the hint tiers in `references/teaching-mode-guide.md` for hint mode).
+   - Final section **`## Task In This Project`** — only here does it tie back to the project's real pain point from Step 4 (the specific function/file to change), with a bit of progressive guidance (not the full solution — follow the hint tiers in `references/teaching-mode-guide.md` for hint mode). If completing the task requires touching something the user hasn't been taught yet in this project (a syntax/API/library call that isn't this milestone's concept and wasn't covered in an earlier milestone either), add a short **"Note: ..."** callout right where it comes up in the task description — a few sentences explaining just enough of that side-concept to not leave the user stuck guessing, without turning it into a full separate lesson (that's what a future milestone is for, if it's substantial enough to deserve one).
    - Sub-section **`## Expected Output`** (REQUIRED, immediately after `## Task In This Project`) — show concretely what should be seen if the task is done correctly: the exact terminal/log output (or its pattern, if part of it is nondeterministic like timestamps or goroutine ordering), for the normal case AND relevant edge cases (e.g., the failure/retry path, not just the success path). This is what lets the user know "is this right?" without having to guess from the task description alone.
 3. Update the project's root `README.md`: the `## Learning Notes` section should just be a **list of links**, don't duplicate the full content there:
    ```markdown
@@ -147,6 +148,7 @@ For milestones that need to be redone or skipped, see the `revisit` and `skip` s
 - Explain the concept's underlying theory in full BEFORE giving a hint/task, in any mode (including hint/self-practice) — don't jump straight to "try to figure out which concept applies" without teaching the theory first.
 - Write full notes (theory + examples + diagram if relevant + task + expected output) to `notes/<id>-<slug>/README.md` BEFORE giving the task to the user (Step 5), not after it's done — so it becomes a written guide the user can open while working. The project root `README.md` should just link to it; don't let the explanation live only in chat.
 - Include an `## Expected Output` section in every milestone's notes — concrete output/values (normal case + relevant edge cases) proving the task was done correctly, not just a task description.
+- If the task requires an untaught side-concept (not this milestone's focus, not covered earlier), add a short "Note: ..." explanation inline in `## Task In This Project` — don't let the user hit unexplained syntax/API with zero context.
 - Include a Mermaid diagram in the notes for concurrency concepts (goroutine/channel/select/worker pool/context) so the data flow is visible, not just text.
 - Ask about the reference material source (AI research vs. the user's own reference) once at the start of the session (Step 3), unless it's already clear from the user's request context or this is a continuing session where it was already asked.
 - Verify the solution via Context7 for the specific concept being taught right now (unless the user chose their own reference — in that case Context7 becomes a supplement, not the primary source).
