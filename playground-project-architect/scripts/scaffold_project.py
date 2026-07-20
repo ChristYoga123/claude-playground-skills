@@ -49,12 +49,13 @@ def yaml_str(value):
     return f'"{escaped}"'
 
 
-def write_roadmap_yaml(path, tech, slug, title, roadmap, created_at):
+def write_roadmap_yaml(path, tech, slug, title, roadmap, created_at, skeleton_mode):
     lines = []
     lines.append("project:")
     lines.append(f"  tech: {tech}")
     lines.append(f"  slug: {slug}")
     lines.append(f"  title: {yaml_str(title)}")
+    lines.append(f"  skeleton_mode: {skeleton_mode}")
     lines.append(f"  created_at: {yaml_str(created_at)}")
     lines.append("")
     lines.append("theme_rationale: |")
@@ -85,22 +86,28 @@ def write_roadmap_yaml(path, tech, slug, title, roadmap, created_at):
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def build_progress(tech, slug, title, project_rel_path, roadmap, now_iso):
+def build_progress(tech, slug, title, project_rel_path, roadmap, now_iso, skeleton_mode):
     milestones = []
     for i, m in enumerate(roadmap["milestones"]):
-        is_m00 = i == 0
+        is_m00_done = i == 0 and skeleton_mode == "ai"
+        if i == 0 and skeleton_mode == "scratch":
+            notes = "Skeleton not built yet - will be built from scratch as the first playground-session-guide session (hint/pair mode)."
+        elif is_m00_done:
+            notes = "Initial skeleton, verified to run before scaffolding."
+        else:
+            notes = ""
         milestones.append({
             "id": m["id"],
             "title": m["title"],
             "concepts": m["concepts"],
             "prerequisites": m.get("prerequisites", []),
-            "status": "completed" if is_m00 else "not_started",
-            "mode": "pair" if is_m00 else None,
-            "started_at": now_iso if is_m00 else None,
-            "completed_at": now_iso if is_m00 else None,
+            "status": "completed" if is_m00_done else "not_started",
+            "mode": "pair" if is_m00_done else None,
+            "started_at": now_iso if is_m00_done else None,
+            "completed_at": now_iso if is_m00_done else None,
             "duration_minutes": None,
             "commit_sha": None,
-            "notes": "Initial skeleton, verified to run before scaffolding." if is_m00 else "",
+            "notes": notes,
         })
     return {
         "project": {
@@ -108,6 +115,7 @@ def build_progress(tech, slug, title, project_rel_path, roadmap, now_iso):
             "slug": slug,
             "title": title,
             "path": project_rel_path,
+            "skeleton_mode": skeleton_mode,
             "created_at": now_iso,
             "last_session_at": now_iso,
             "total_sessions": 1,
@@ -121,7 +129,21 @@ def write_progress_json(path, progress):
     path.write_text(json.dumps(progress, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
-def write_readme(path, title, tech, theme_rationale, run_command):
+def write_readme(path, title, tech, theme_rationale, run_command, skeleton_mode):
+    if skeleton_mode == "scratch":
+        running_section = """## Running It
+
+Not runnable yet - the m00 skeleton hasn't been built. It will be built from scratch
+in the first `playground-session-guide` session (hint/pair mode), just like every
+other milestone.
+"""
+    else:
+        running_section = f"""## Running It
+
+```bash
+{run_command}
+```
+"""
     content = f"""# {title}
 
 > A **{tech}** learning project created via `playground-project-architect`.
@@ -131,12 +153,7 @@ def write_readme(path, title, tech, theme_rationale, run_command):
 
 {theme_rationale.strip()}
 
-## Running It
-
-```bash
-{run_command}
-```
-
+{running_section}
 ## Learning Structure
 
 The full roadmap is in [`roadmap.yaml`](./roadmap.yaml). Progress and status for each milestone
@@ -187,13 +204,21 @@ def regenerate_index(playground_root):
 
 def main():
     parser = argparse.ArgumentParser(description="Scaffold a new playground learning project")
-    parser.add_argument("--project-dir", required=True, help="Absolute path to the project directory (already has m00 skeleton)")
+    parser.add_argument("--project-dir", required=True, help="Absolute path to the project directory")
     parser.add_argument("--tech", required=True, help="Tech slug, e.g. go, postgresql, kafka")
     parser.add_argument("--slug", required=True, help="Project slug, e.g. url-shortener")
     parser.add_argument("--title", required=True, help="Project title")
-    parser.add_argument("--run-command", required=True, help="Command to run the m00 skeleton, e.g. 'go run .'")
+    parser.add_argument("--skeleton-mode", choices=["ai", "scratch"], default="scratch",
+                         help="'ai' = m00 already built and verified to run by Claude before this script runs. "
+                              "'scratch' (default) = no m00 code was written; m00 stays not_started and will be "
+                              "built from scratch as the project's first playground-session-guide session.")
+    parser.add_argument("--run-command", default=None,
+                         help="Command to run the m00 skeleton, e.g. 'go run .' (required when --skeleton-mode ai)")
     parser.add_argument("--roadmap-json", required=True, help="JSON string with theme_rationale, context7_libraries_consulted, milestones")
     args = parser.parse_args()
+
+    if args.skeleton_mode == "ai" and not args.run_command:
+        raise SystemExit("[!] --run-command is required when --skeleton-mode ai")
 
     project_dir = Path(args.project_dir).resolve()
     if not project_dir.is_dir():
@@ -211,14 +236,14 @@ def main():
     project_rel_path = f"{args.tech}/{args.slug}"
 
     log(f"Writing roadmap.yaml at {project_dir}")
-    write_roadmap_yaml(project_dir / "roadmap.yaml", args.tech, args.slug, args.title, roadmap, created_at)
+    write_roadmap_yaml(project_dir / "roadmap.yaml", args.tech, args.slug, args.title, roadmap, created_at, args.skeleton_mode)
 
     log("Writing progress.json")
-    progress = build_progress(args.tech, args.slug, args.title, project_rel_path, roadmap, now_iso)
+    progress = build_progress(args.tech, args.slug, args.title, project_rel_path, roadmap, now_iso, args.skeleton_mode)
     write_progress_json(project_dir / "progress.json", progress)
 
     log("Writing README.md")
-    write_readme(project_dir / "README.md", args.title, args.tech, roadmap["theme_rationale"], args.run_command)
+    write_readme(project_dir / "README.md", args.title, args.tech, roadmap["theme_rationale"], args.run_command, args.skeleton_mode)
 
     log("git init & initial commit")
     if not (project_dir / ".git").exists():
@@ -226,19 +251,25 @@ def main():
     run_git(["add", "-A"], project_dir)
 
     m00 = roadmap["milestones"][0]
-    commit_subject = f"{m00['id']}: {m00['title']}"
-    commit_body = (
-        "Initial project skeleton, verified to run.\n\n"
-        f"Milestone-Id: {m00['id']}"
-    )
+    if args.skeleton_mode == "ai":
+        commit_subject = f"{m00['id']}: {m00['title']}"
+        commit_body = f"Initial project skeleton, verified to run.\n\nMilestone-Id: {m00['id']}"
+    else:
+        commit_subject = "chore: scaffold learning project metadata"
+        commit_body = (
+            "roadmap.yaml, progress.json, README.md for a new playground project.\n"
+            "No m00 code yet - it will be built from scratch in the first "
+            "playground-session-guide session."
+        )
     run_git(["commit", "-m", commit_subject, "-m", commit_body], project_dir)
     commit_sha = run_git(["rev-parse", "--short", "HEAD"], project_dir)
 
-    log(f"Updating commit_sha m00 -> {commit_sha}")
-    progress["milestones"][0]["commit_sha"] = commit_sha
-    write_progress_json(project_dir / "progress.json", progress)
-    run_git(["add", "progress.json"], project_dir)
-    run_git(["commit", "--amend", "--no-edit"], project_dir)
+    if args.skeleton_mode == "ai":
+        log(f"Updating commit_sha m00 -> {commit_sha}")
+        progress["milestones"][0]["commit_sha"] = commit_sha
+        write_progress_json(project_dir / "progress.json", progress)
+        run_git(["add", "progress.json"], project_dir)
+        run_git(["commit", "--amend", "--no-edit"], project_dir)
 
     log("Regenerating programming-playground/README.md index")
     regenerate_index(playground_root)

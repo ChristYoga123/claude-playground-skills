@@ -9,6 +9,7 @@ project:
   tech: go
   slug: url-shortener
   title: "URL Shortener with Caching & Rate Limiting"
+  skeleton_mode: scratch  # "scratch" (default) or "ai" - see SKILL.md Step 1.4 / Step 5
   created_at: "2026-07-18"
 
 theme_rationale: |
@@ -80,7 +81,9 @@ The script accepts the roadmap as JSON via `--roadmap-json` (a single valid JSON
 ```
 
 Important notes:
-- Milestone `m00` MUST be present in this list and represent the skeleton already verified to run in SKILL.md Step 5 — `scaffold_project.py` automatically marks it `completed` in `progress.json` (with the `commit_sha` from the initial commit the script makes) since the skeleton was already proven to work before the scaffold ran.
-- All milestones other than `m00` start with status `not_started`.
+- Milestone `m00` MUST always be present in this list, but its handling depends on the `--skeleton-mode` chosen in SKILL.md Step 1.4:
+  - `ai`: `m00` represents the skeleton already verified to run in SKILL.md Step 5 — `scaffold_project.py` automatically marks it `completed` in `progress.json` (with the `commit_sha` from the initial commit the script makes) since the skeleton was already proven to work before the scaffold ran.
+  - `scratch` (default): `m00` describes the skeleton that WILL be built, but no code for it exists yet — `scaffold_project.py` leaves it `not_started`, same as every other milestone. `playground-session-guide` teaches and builds it as the project's first session.
+- All milestones other than `m00` always start with status `not_started`.
 - `id`, `title`, `concepts`, `why_now`, and `theme_rationale` are all written in English (the `id`/`title`/`concepts` vocabulary is also reused in commit messages later).
 - The order of milestones in the JSON determines their display order in `roadmap.yaml` and `progress.json` — keep them ordered basics → mastery.
